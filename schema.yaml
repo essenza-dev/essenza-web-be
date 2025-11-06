@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+  title: Essenza Backend API
+  version: 1.0.0
+  description: API Documentation for Essenza Backend Application
+paths:
+  /health:
+    get:
+      operationId: health_retrieve
+      description: Simple health check endpoint to verify API is running
+      summary: Health Check
+      tags:
+      - '[01] General'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: API is healthy
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: API is healthy
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-05T17:39:56.395438'
+          description: ''
+  /v1/auth/token:
+    post:
+      operationId: v1_auth_token_create
+      description: Endpoint for user login with username and password
+      summary: Create Auth Token
+      tags:
+      - '[02] Authentication'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostAuthTokenRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostAuthTokenRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostAuthTokenRequestRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Login successful
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Login successful
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+                      refresh_token:
+                        type: string
+                        example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4gZXhhbXBsZQ==
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-05T17:39:56.395438'
+          description: ''
+    put:
+      operationId: v1_auth_token_update
+      description: Endpoint for user to refresh JWT token
+      summary: Refresh Auth Token
+      tags:
+      - '[02] Authentication'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutAuthTokenRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PutAuthTokenRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PutAuthTokenRequestRequest'
+        required: true
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Token refreshed successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Token refreshed successfully
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+                      refresh_token:
+                        type: string
+                        example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4gZXhhbXBsZQ==
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-05T17:39:56.395438'
+          description: ''
+components:
+  schemas:
+    PostAuthTokenRequestRequest:
+      type: object
+      description: User login request schema.
+      properties:
+        username:
+          type: string
+          minLength: 5
+          description: Username or email address for login
+        password:
+          type: string
+          minLength: 8
+          description: User password
+      required:
+      - password
+      - username
+    PutAuthTokenRequestRequest:
+      type: object
+      description: User token refresh request schema.
+      properties:
+        refresh_token:
+          type: string
+          minLength: 1
+          description: JWT refresh token for obtaining new access tokens
+      required:
+      - refresh_token
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'JWT Bearer token authentication. Format: Bearer <jwt_token>'
