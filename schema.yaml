@@ -144,8 +144,310 @@ paths:
                         format: date-time
                         example: '2025-11-05T17:39:56.395438'
           description: ''
+  /v1/auth/me:
+    patch:
+      operationId: v1_auth_me_partial_update
+      description: Endpoint to update the profile of the authenticated user
+      summary: Update Authenticated User Profile
+      tags:
+      - '[02] Authentication'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: User profile updated successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: User profile updated successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      username:
+                        type: string
+                        example: ruriazz
+                      name:
+                        type: string
+                        example: aziz ruri
+                      email:
+                        type: string
+                        example: me@ruriazz.com
+                      role:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: editor
+                          label:
+                            type: string
+                            example: Editor
+                      is_active:
+                        type: boolean
+                        example: true
+                      last_login:
+                        type: string
+                        format: date-time
+                        example: '2025-11-07T23:01:05.412277+07:00'
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-05T18:58:09.201000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-07T21:47:31.094337+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-07T23:20:19.170921'
+          description: ''
+    get:
+      operationId: v1_auth_me_retrieve
+      description: Endpoint to retrieve the profile of the authenticated user
+      summary: Get Authenticated User Profile
+      tags:
+      - '[02] Authentication'
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: User profile retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: User profile retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      username:
+                        type: string
+                        example: ruriazz
+                      name:
+                        type: string
+                        example: aziz ruri
+                      email:
+                        type: string
+                        example: me@ruriazz.com
+                      role:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            example: editor
+                          label:
+                            type: string
+                            example: Editor
+                      is_active:
+                        type: boolean
+                        example: true
+                      last_login:
+                        type: string
+                        format: date-time
+                        example: '2025-11-07T23:01:05.412277+07:00'
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-05T18:58:09.201000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-07T21:47:31.094337+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-07T23:20:19.170921'
+          description: ''
+  /v1/auth/password:
+    put:
+      operationId: v1_auth_password_update
+      description: Endpoint to change the password of the authenticated user
+      summary: Change Authenticated User Password
+      tags:
+      - '[02] Authentication'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutAuthUserPasswordRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PutAuthUserPasswordRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PutAuthUserPasswordRequestRequest'
+        required: true
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Password changed successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Password changed successfully
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+                      refresh_token:
+                        type: string
+                        example: dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4gZXhhbXBsZQ==
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-05T17:39:56.395438'
+          description: ''
+  /v1/settings/:
+    get:
+      operationId: v1_settings_retrieve
+      description: Endpoint to retrieve application settings.
+      summary: Retrieve Application Settings
+      tags:
+      - '[04] Settings'
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Settings retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Settings retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      site_name:
+                        type: string
+                        example: My Awesome Site
+                      site_description:
+                        type: string
+                        example: A modern web platform for various online services.
+                      site_logo:
+                        type: string
+                        example: /static/images/logo.png
+                      favicon:
+                        type: string
+                        example: /static/images/favicon.ico
+                      meta_keywords:
+                        type: string
+                        example: website, online, platform, services
+                      meta_description:
+                        type: string
+                        example: My Awesome Site provides fast and reliable web solutions.
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-08T01:15:25.397000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-08T01:15:25.397000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-08T01:55:16.063682'
+          description: ''
 components:
   schemas:
+    PatchedPatchAuthUserProfileRequestRequest:
+      type: object
+      description: Authenticated user profile update request schema.
+      properties:
+        username:
+          type: string
+          nullable: true
+          minLength: 5
+          description: Username of the user
+          maxLength: 100
+        name:
+          type: string
+          nullable: true
+          description: Full name of the user
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          nullable: true
+          minLength: 1
+          description: Email address of the user
     PostAuthTokenRequestRequest:
       type: object
       description: User login request schema.
@@ -171,6 +473,21 @@ components:
           description: JWT refresh token for obtaining new access tokens
       required:
       - refresh_token
+    PutAuthUserPasswordRequestRequest:
+      type: object
+      description: Authenticated user password change request schema.
+      properties:
+        current_password:
+          type: string
+          minLength: 8
+          description: Current password of the user
+        new_password:
+          type: string
+          minLength: 8
+          description: New password for the user
+      required:
+      - current_password
+      - new_password
   securitySchemes:
     BearerAuth:
       type: http

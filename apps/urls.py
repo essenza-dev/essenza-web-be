@@ -43,5 +43,5 @@ urlpatterns = [
 
     # V1 API Routes
     path("v1/auth/", include("apps.auth.urls")),
-
+    path('v1/settings/', include("apps.setting.urls")),
 ]
