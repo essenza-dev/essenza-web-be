@@ -2,6 +2,7 @@ import time
 from typing import Any, Dict, Optional
 
 from django.db.models import Q
+from django.utils import timezone
 from rest_framework.request import Request
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
@@ -50,6 +51,9 @@ class AuthTokenAPIView(BaseApiView):
 
         if user and user.check_password(password):
             token, refresh_token = self._jwt.encode(user.username)
+            user.last_login = timezone.now()
+            user.save()
+
             return api_response(request).success(
                 data=PostAuthTokenResponse(
                     instance={"token": token, "refresh_token": refresh_token}

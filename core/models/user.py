@@ -33,7 +33,7 @@ class User(TimeStampedModel):
         if not self.username:
             raise ValueError("Username must be set before peppering a password.")
 
-        return f"{self.username}.{raw_password}.{settings.SECRET_KEY}"
+        return f"{self.role}.{self.username}.{raw_password}.{settings.SECRET_KEY}"
 
     def set_password(self, raw_password: str) -> None:
         """Hash and set the user's password."""
