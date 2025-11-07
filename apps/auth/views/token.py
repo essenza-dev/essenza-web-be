@@ -5,10 +5,7 @@ from django.db.models import Q
 from django.utils import timezone
 from rest_framework.request import Request
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
 
-from core.constants.api_docs import ApiResponseDocs, ApiTags
-from core.constants.api_docs import ApiResponseDocs
 from core.models import User
 from core.views import BaseApiView
 from utils.jwt import JsonWebToken
@@ -19,6 +16,7 @@ from apps.auth.serializers import (
     PostAuthTokenResponse,
     PutAuthTokenRequest,
 )
+from docs.api.authentication import AuthenticationApi
 
 
 class AuthTokenAPIView(BaseApiView):
@@ -28,14 +26,7 @@ class AuthTokenAPIView(BaseApiView):
 
     _jwt: JsonWebToken = JsonWebToken()
 
-    @extend_schema(
-        summary="Create Auth Token",
-        description="Endpoint for user login with username and password",
-        request=PostAuthTokenRequest,
-        tags=[ApiTags.API_AUTHENTICATION],
-        auth=[],
-        responses=ApiResponseDocs.CREATE_AUTH_TOKEN
-    )
+    @AuthenticationApi.create_auth_token
     @validate_body(PostAuthTokenRequest)
     def post(self, request: Request, validated_data: Dict[str, Any]) -> Response:
         """
@@ -66,13 +57,7 @@ class AuthTokenAPIView(BaseApiView):
         )
 
     @jwt_refresh_token_required
-    @extend_schema(
-        summary="Refresh Auth Token",
-        description="Endpoint for user to refresh JWT token",
-        request=PutAuthTokenRequest,
-        tags=[ApiTags.API_AUTHENTICATION],
-        responses=ApiResponseDocs.REFRESH_AUTH_TOKEN,
-    )
+    @AuthenticationApi.refresh_auth_token
     @validate_body(PutAuthTokenRequest)
     def put(self, request: Request, validated_data: Dict[str, Any]) -> Response:
         """

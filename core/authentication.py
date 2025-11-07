@@ -80,8 +80,6 @@ class JWTAuthentication(BaseAuthentication):
             jwt_handler = JsonWebToken()
             payload = jwt_handler.decode(token)
 
-            print("payload:", payload)  # Debugging line
-
             if not payload:
                 raise AuthenticationFailed("Invalid or expired token")
 
