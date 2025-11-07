@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from django.db.models import Q
-from django.utils import timezone
+from django.utils import timezone as django_timezone
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -21,28 +21,29 @@ from docs.api.authentication import AuthenticationApi
 
 class AuthTokenAPIView(BaseApiView):
     """
-    API View for user authentication and token management
+    API View for user authentication and token management operations
     """
 
     @AuthenticationApi.create_auth_token
     @validate_body(PostAuthTokenRequest)
     def post(self, request: Request, validated_data: Dict[str, Any]) -> Response:
         """
-        Authenticate user and generate JWT tokens
+        Authenticate user credentials and generate JWT tokens
         """
         username: str = validated_data["username"]
         password: str = validated_data["password"]
 
-        # Optimize query by using select_related if needed and only() for specific fields
-        user: Optional[User] = User.objects.filter(
+        # Optimize query with specific field selection and single database hit
+        user: User | None = User.objects.filter(
             Q(username=username) | Q(email=username)
-        ).only('id', 'username', 'password').first()
+        ).only('id', 'username', 'password', 'token_signature').first()
 
         if user and user.check_password(password):
             jwt_handler = JsonWebToken(user.token_signature)
             token, refresh_token = jwt_handler.encode(str(user.id))
-            user.last_login = timezone.now()
-            user.save()
+
+            # Update last_login with optimized query
+            User.objects.filter(id=user.id).update(last_login=django_timezone.now())
 
             return api_response(request).success(
                 data=PostAuthTokenResponse(
@@ -60,7 +61,7 @@ class AuthTokenAPIView(BaseApiView):
     @validate_body(PutAuthTokenRequest)
     def put(self, request: Request, validated_data: Dict[str, Any]) -> Response:
         """
-        Refresh JWT token if the refresh token is valid and token is near expiration
+        Refresh JWT tokens when current token is near expiration
         """
         user = request.user
         jwt_handler = JsonWebToken(user.token_signature)
@@ -74,11 +75,11 @@ class AuthTokenAPIView(BaseApiView):
 
         now = datetime.now(timezone.utc)
         payload: Dict[str, Any] = jwt_handler.decode(current_token, expiration=False)
-        remaining_time: int = payload['exp'] - now.timestamp()
+        remaining_time: int = payload['exp'] - int(now.timestamp())
 
-        # Only generate new token if current one expires within 2 minutes
+        # Generate new tokens only if current token expires within 2 minutes
         if remaining_time < 120:
-            current_token, current_signature = jwt_handler.encode(str(request.user.id))
+            current_token, current_signature = jwt_handler.encode(str(user.id))
 
         return api_response(request).success(
             data=PostAuthTokenResponse(

@@ -218,7 +218,7 @@ class AuthenticationApi:
                         "status_code": {"type": "integer", "example": 200},
                         "message": {
                             "type": "string",
-                            "example": "User profile retrieved successfully",
+                            "example": "User profile updated successfully",
                         },
                         "data": {
                             "type": "object",
@@ -265,6 +265,58 @@ class AuthenticationApi:
                                     "type": "string",
                                     "format": "date-time",
                                     "example": "2025-11-07T23:20:19.170921",
+                                }
+                            },
+                        },
+                    },
+                }
+            },
+        )
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    @staticmethod
+    def change_password(func):
+        """
+        Decorator for change authenticated user password endpoint documentation
+        """
+
+        @extend_schema(
+            tags=[TAGS],
+            summary="Change Authenticated User Password",
+            description="Endpoint to change the password of the authenticated user",
+            request=serializers.PutAuthUserPasswordRequest,
+            responses={
+                200: {
+                    "description": "Password changed successfully",
+                    "type": "object",
+                    "properties": {
+                        "success": {"type": "boolean", "example": True},
+                        "status_code": {"type": "integer", "example": 200},
+                        "message": {"type": "string", "example": "Password changed successfully"},
+                        "data": {
+                            "type": "object",
+                            "properties": {
+                                "token": {
+                                    "type": "string",
+                                    "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                                },
+                                "refresh_token": {
+                                    "type": "string",
+                                    "example": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4gZXhhbXBsZQ==",
+                                },
+                            },
+                        },
+                        "meta": {
+                            "type": "object",
+                            "properties": {
+                                "timestamp": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-05T17:39:56.395438",
                                 }
                             },
                         },
