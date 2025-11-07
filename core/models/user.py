@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
 from core.enums.user_role import UserRole
 from core.models._base import TimeStampedModel
+from utils.crypto import Signature
 
 
 class User(TimeStampedModel):
@@ -28,12 +29,27 @@ class User(TimeStampedModel):
     def __str__(self) -> str:
         return f"{self.id}: {self.email}"
 
+    @property
+    def token_signature(self) -> str:
+        sig = Signature(settings.SECRET_KEY)
+        return sig.generate_signature(f"{self.id}.{self.password}")
+
+    @property
+    def is_authenticated(self) -> bool:
+        return getattr(self, "_is_authenticated", False)
+
+    @is_authenticated.setter
+    def is_authenticated(self, value: bool) -> None:
+        self._is_authenticated = value
+
     def __pepper_password(self, raw_password: str) -> str:
         """Apply peppering to the raw password."""
-        if not self.username:
-            raise ValueError("Username must be set before peppering a password.")
+        if not self.id:
+            raise ValueError("User ID must be set before peppering the password.")
 
-        return f"{self.role}.{self.username}.{raw_password}.{settings.SECRET_KEY}"
+        sig = Signature(settings.SECRET_KEY)
+        sign_id = sig.generate_signature(str(self.id))
+        return f"{sign_id}.{self.username}.{raw_password}.{settings.SECRET_KEY}"
 
     def set_password(self, raw_password: str) -> None:
         """Hash and set the user's password."""
@@ -44,3 +60,13 @@ class User(TimeStampedModel):
         """Check if the provided password matches the user's password."""
         password = self.__pepper_password(raw_password)
         return check_password(password, self.password)
+
+    @staticmethod
+    def available_username(username: str) -> bool:
+        """Check if the username is available (not taken by other users)."""
+        return not User.objects.filter(username=username).exists()
+
+    @staticmethod
+    def available_email(email_address: str) -> bool:
+        """Check if the email is available (not taken by other users)."""
+        return not User.objects.filter(email=email_address).exists()

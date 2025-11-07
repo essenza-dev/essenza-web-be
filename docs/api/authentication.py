@@ -118,3 +118,162 @@ class AuthenticationApi:
             return func(*args, **kwargs)
 
         return wrapper
+
+    @staticmethod
+    def get_profile(func):
+        """
+        Decorator for get authenticated user profile endpoint documentation
+        """
+
+        @extend_schema(
+            tags=[TAGS],
+            summary="Get Authenticated User Profile",
+            description="Endpoint to retrieve the profile of the authenticated user",
+            responses={
+                200: {
+                    "description": "User profile retrieved successfully",
+                    "type": "object",
+                    "properties": {
+                        "success": {"type": "boolean", "example": True},
+                        "status_code": {"type": "integer", "example": 200},
+                        "message": {
+                            "type": "string",
+                            "example": "User profile retrieved successfully",
+                        },
+                        "data": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "integer", "example": 1},
+                                "username": {"type": "string", "example": "ruriazz"},
+                                "name": {"type": "string", "example": "aziz ruri"},
+                                "email": {
+                                    "type": "string",
+                                    "example": "me@ruriazz.com",
+                                },
+                                "role": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {"type": "string", "example": "editor"},
+                                        "label": {
+                                            "type": "string",
+                                            "example": "Editor",
+                                        },
+                                    },
+                                },
+                                "is_active": {"type": "boolean", "example": True},
+                                "last_login": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-07T23:01:05.412277+07:00",
+                                },
+                                "created_at": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-05T18:58:09.201000+07:00",
+                                },
+                                "updated_at": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-07T21:47:31.094337+07:00",
+                                },
+                            },
+                        },
+                        "meta": {
+                            "type": "object",
+                            "properties": {
+                                "timestamp": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-07T23:20:19.170921",
+                                }
+                            },
+                        },
+                    },
+                }
+            },
+        )
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    @staticmethod
+    def update_profile(func):
+        """
+        Decorator for update authenticated user profile endpoint documentation
+        """
+
+        @extend_schema(
+            tags=[TAGS],
+            summary="Update Authenticated User Profile",
+            description="Endpoint to update the profile of the authenticated user",
+            request=serializers.PatchAuthUserProfileRequest,
+            responses={
+                200: {
+                    "description": "User profile updated successfully",
+                    "type": "object",
+                    "properties": {
+                        "success": {"type": "boolean", "example": True},
+                        "status_code": {"type": "integer", "example": 200},
+                        "message": {
+                            "type": "string",
+                            "example": "User profile retrieved successfully",
+                        },
+                        "data": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "integer", "example": 1},
+                                "username": {"type": "string", "example": "ruriazz"},
+                                "name": {"type": "string", "example": "aziz ruri"},
+                                "email": {
+                                    "type": "string",
+                                    "example": "me@ruriazz.com",
+                                },
+                                "role": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {"type": "string", "example": "editor"},
+                                        "label": {
+                                            "type": "string",
+                                            "example": "Editor",
+                                        },
+                                    },
+                                },
+                                "is_active": {"type": "boolean", "example": True},
+                                "last_login": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-07T23:01:05.412277+07:00",
+                                },
+                                "created_at": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-05T18:58:09.201000+07:00",
+                                },
+                                "updated_at": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-07T21:47:31.094337+07:00",
+                                },
+                            },
+                        },
+                        "meta": {
+                            "type": "object",
+                            "properties": {
+                                "timestamp": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-07T23:20:19.170921",
+                                }
+                            },
+                        },
+                    },
+                }
+            },
+        )
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper

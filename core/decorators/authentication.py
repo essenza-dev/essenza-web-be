@@ -165,6 +165,7 @@ def _authenticate_request(request: Request) -> tuple[Any, str]:
 
 
 def _authenticate_refresh_token_request(request: Request) -> tuple[Any, str]:
+    # sourcery skip: extract-method, reintroduce-else, swap-if-else-branches, use-named-expression
     """
     Authenticate the request allowing expired JWT tokens for refresh operations.
 
@@ -194,20 +195,20 @@ def _authenticate_refresh_token_request(request: Request) -> tuple[Any, str]:
 
     # Validate token structure and extract user (allow expired tokens)
     try:
-        jwt_handler = JsonWebToken()
+        # Get user from database
+        from core.models import User
+
+        user = User.objects.get(
+            id=JsonWebToken().get_subject(
+                token, expiration=False, signature=False
+            )
+        )
+        jwt_handler = JsonWebToken(user.token_signature)
 
         # Try to decode without expiration validation first
         username = jwt_handler.get_subject(token, expiration=False)
-
         if not username:
             raise AuthenticationFailed('Token payload is invalid - missing username.')
-
-        # Get user from database
-        from core.models import User
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist as exc:
-            raise AuthenticationFailed('User not found.') from exc
 
         return user, token
 

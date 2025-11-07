@@ -1,4 +1,4 @@
-import time
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from django.db.models import Q
@@ -24,8 +24,6 @@ class AuthTokenAPIView(BaseApiView):
     API View for user authentication and token management
     """
 
-    _jwt: JsonWebToken = JsonWebToken()
-
     @AuthenticationApi.create_auth_token
     @validate_body(PostAuthTokenRequest)
     def post(self, request: Request, validated_data: Dict[str, Any]) -> Response:
@@ -41,7 +39,8 @@ class AuthTokenAPIView(BaseApiView):
         ).only('id', 'username', 'password').first()
 
         if user and user.check_password(password):
-            token, refresh_token = self._jwt.encode(user.username)
+            jwt_handler = JsonWebToken(user.token_signature)
+            token, refresh_token = jwt_handler.encode(str(user.id))
             user.last_login = timezone.now()
             user.save()
 
@@ -63,20 +62,23 @@ class AuthTokenAPIView(BaseApiView):
         """
         Refresh JWT token if the refresh token is valid and token is near expiration
         """
+        user = request.user
+        jwt_handler = JsonWebToken(user.token_signature)
         current_token: str = request.auth
-        current_signature: str = self._jwt.get_signature(current_token)
+        current_signature: str = jwt_handler.get_signature(current_token)
 
         if current_signature != validated_data["refresh_token"]:
             return api_response(request).unauthorized(
                 message="Invalid refresh token"
             )
 
-        payload: Dict[str, Any] = self._jwt.decode(current_token, expiration=False)
-        remaining_time: int = payload['exp'] - int(time.time())
+        now = datetime.now(timezone.utc)
+        payload: Dict[str, Any] = jwt_handler.decode(current_token, expiration=False)
+        remaining_time: int = payload['exp'] - now.timestamp()
 
         # Only generate new token if current one expires within 2 minutes
         if remaining_time < 120:
-            current_token, current_signature = self._jwt.encode(request.user.username)
+            current_token, current_signature = jwt_handler.encode(str(request.user.id))
 
         return api_response(request).success(
             data=PostAuthTokenResponse(

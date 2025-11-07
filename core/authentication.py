@@ -77,19 +77,13 @@ class JWTAuthentication(BaseAuthentication):
             AuthenticationFailed: If token validation or user lookup fails
         """
         try:
-            jwt_handler = JsonWebToken()
-            payload = jwt_handler.decode(token)
+            user = self._get_user(
+                JsonWebToken().get_subject(token, expiration=False, signature=False)
+            )
 
-            if not payload:
-                raise AuthenticationFailed("Invalid or expired token")
+            jwt_handler = JsonWebToken(user.token_signature)
 
-            username = payload.get("username")
-            if not username:
-                raise AuthenticationFailed(
-                    "Token payload is invalid - missing username"
-                )
-
-            user = self._get_user(username)
+            user.is_authenticated = user.is_active and jwt_handler.verify(token)
             return (user, token)
 
         except AuthenticationFailed:
@@ -97,12 +91,12 @@ class JWTAuthentication(BaseAuthentication):
         except Exception as exc:
             raise AuthenticationFailed(f"Token validation failed: {exc}") from exc
 
-    def _get_user(self, username: str) -> User:
+    def _get_user(self, id: str) -> User:
         """
-        Retrieve user by username.
+        Retrieve user by id.
 
         Args:
-            username: The username to look up
+            id: The id to look up
 
         Returns:
             User instance
@@ -111,7 +105,7 @@ class JWTAuthentication(BaseAuthentication):
             AuthenticationFailed: If user is not found
         """
         try:
-            return User.objects.get(username=username)
+            return User.objects.get(id=id)
         except User.DoesNotExist as exc:
             raise AuthenticationFailed("User not found") from exc
 
