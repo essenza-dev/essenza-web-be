@@ -36,7 +36,7 @@ class AuthTokenAPIView(BaseApiView):
         # Optimize query with specific field selection and single database hit
         user: User | None = User.objects.filter(
             Q(username=username) | Q(email=username)
-        ).only('id', 'username', 'password', 'token_signature').first()
+        ).only('id', 'username', 'password').first()
 
         if user and user.check_password(password):
             jwt_handler = JsonWebToken(user.token_signature)
