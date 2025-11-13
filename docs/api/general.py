@@ -1,7 +1,7 @@
 from functools import wraps
 from drf_spectacular.utils import extend_schema
 
-TAGS = "[01] General"
+TAGS = "General"
 
 
 class GeneralApi:
@@ -16,6 +16,7 @@ class GeneralApi:
         """
 
         @extend_schema(
+            operation_id="general_health_check",
             tags=[TAGS],
             summary="Health Check",
             description="Simple health check endpoint to verify API is running",

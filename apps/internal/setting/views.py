@@ -3,10 +3,10 @@ from typing import Any
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from apps.setting import serializers
+from apps.internal.setting import serializers
 from core.models import Setting
 from core.views import BaseViewSet
-from docs.api import SettingApi
+from docs.api.internal import SettingApi
 from utils.response import api_response
 
 

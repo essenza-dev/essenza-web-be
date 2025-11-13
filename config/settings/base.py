@@ -15,6 +15,8 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+SILENCED_SYSTEM_CHECKS = ["urls.W002"]
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
@@ -236,11 +238,7 @@ SPECTACULAR_SETTINGS = {
     "SECURITY": [{"BearerAuth": []}],
     "COMPONENTS": {
         "securitySchemes": {
-            "BearerAuth": {
-                "type": "http",
-                "scheme": "bearer",
-                "bearerFormat": "JWT"
-            }
+            "BearerAuth": {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
         }
     },
     "REDOC_UI_SETTINGS": {
@@ -255,6 +253,21 @@ SPECTACULAR_SETTINGS = {
     ],
     "SCHEMA_PATH_PREFIX": "/api/",
     "DEFAULT_GENERATOR_CLASS": "drf_spectacular.generators.SchemaGenerator",
+    "TAGS": [
+        {"name": "General", "description": "General purpose endpoints"},
+        {
+            "name": "Internal / Authentication",
+            "description": "Authentication related endpoints",
+        },
+        {
+            "name": "Internal / Settings",
+            "description": "Application settings management",
+        },
+        {
+            "name": "Internal / Social Media",
+            "description": "Social media links management",
+        },
+    ],
 }
 
 # Migration modules - Skip unwanted migrations

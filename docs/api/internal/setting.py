@@ -1,7 +1,7 @@
 from functools import wraps
 from drf_spectacular.utils import extend_schema
 
-TAGS = "[04] Settings"
+TAGS = ["Internal / Settings"]
 
 
 class SettingApi:
@@ -9,9 +9,11 @@ class SettingApi:
     def get_settings(func):
 
         @extend_schema(
-            tags=[TAGS],
+            operation_id="int_v1_settings_retrieve",
+            tags=TAGS,
             summary="Retrieve Application Settings",
             description="Endpoint to retrieve application settings.",
+            auth=[],
             responses={
                 200: {
                     "description": "Settings retrieved successfully",

@@ -28,7 +28,6 @@ router = DefaultRouter()
 
 urlpatterns = [
     path("", include(router.urls)),
-
     # API Documentation
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
@@ -37,11 +36,8 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
-
     # Health check endpoint
     path("health", views.health_check, name="health_check"),
-
-    # V1 API Routes
-    path("v1/auth/", include("apps.auth.urls")),
-    path('v1/settings/', include("apps.setting.urls")),
+    # Internal app routes
+    path("int", include("apps.internal.urls")),
 ]

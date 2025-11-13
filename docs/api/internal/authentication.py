@@ -1,9 +1,9 @@
 from functools import wraps
 from drf_spectacular.utils import extend_schema
 
-from apps.auth import serializers
+from apps.internal.auth import serializers
 
-TAGS = "[02] Authentication"
+TAGS = ["Internal / Authentication"]
 
 
 class AuthenticationApi:
@@ -18,7 +18,8 @@ class AuthenticationApi:
         """
 
         @extend_schema(
-            tags=[TAGS],
+            operation_id="int_v1_auth_login",
+            tags=TAGS,
             summary="Create Auth Token",
             description="Endpoint for user login with username and password",
             request=serializers.PostAuthTokenRequest,
@@ -71,7 +72,8 @@ class AuthenticationApi:
         """
 
         @extend_schema(
-            tags=[TAGS],
+            operation_id="int_v1_auth_refresh",
+            tags=TAGS,
             summary="Refresh Auth Token",
             description="Endpoint for user to refresh JWT token",
             request=serializers.PutAuthTokenRequest,
@@ -126,7 +128,8 @@ class AuthenticationApi:
         """
 
         @extend_schema(
-            tags=[TAGS],
+            operation_id="int_v1_auth_profile",
+            tags=TAGS,
             summary="Get Authenticated User Profile",
             description="Endpoint to retrieve the profile of the authenticated user",
             responses={
@@ -205,7 +208,8 @@ class AuthenticationApi:
         """
 
         @extend_schema(
-            tags=[TAGS],
+            operation_id="int_v1_auth_profile_update",
+            tags=TAGS,
             summary="Update Authenticated User Profile",
             description="Endpoint to update the profile of the authenticated user",
             request=serializers.PatchAuthUserProfileRequest,
@@ -285,7 +289,8 @@ class AuthenticationApi:
         """
 
         @extend_schema(
-            tags=[TAGS],
+            operation_id="int_v1_auth_change_password",
+            tags=TAGS,
             summary="Change Authenticated User Password",
             description="Endpoint to change the password of the authenticated user",
             request=serializers.PutAuthUserPasswordRequest,
@@ -296,7 +301,10 @@ class AuthenticationApi:
                     "properties": {
                         "success": {"type": "boolean", "example": True},
                         "status_code": {"type": "integer", "example": 200},
-                        "message": {"type": "string", "example": "Password changed successfully"},
+                        "message": {
+                            "type": "string",
+                            "example": "Password changed successfully",
+                        },
                         "data": {
                             "type": "object",
                             "properties": {
