@@ -11,9 +11,10 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 SILENCED_SYSTEM_CHECKS = ["urls.W002"]
 
@@ -22,13 +23,24 @@ SILENCED_SYSTEM_CHECKS = ["urls.W002"]
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-07%ic$e*%_4g$0xfu9qo1+t%r#th52*d^&oswt@t5ky*@rm0vj"
+SECRET_KEY = os.getenv(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-07%ic$e*%_4g$0xfu9qo1+t%r#th52*d^&oswt@t5ky*@rm0vj",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
+    "*",  # Allow all hosts in development (use with caution)
+]
 
+# CORS settings for development
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
 
@@ -46,16 +58,26 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "core.middleware.request_logging.RequestLoggingMiddleware",
-    "core.handlers.exception.ExceptionMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # Add if using django-cors-headers
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.middleware.request_logging.RequestLoggingMiddleware",
 ]
 
 ROOT_URLCONF = "apps.urls"
+
+# Security settings - relaxed for development
+SECURE_SSL_REDIRECT = False
+SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
+SECURE_CONTENT_TYPE_NOSNIFF = False
+SECURE_BROWSER_XSS_FILTER = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 TEMPLATES = [
     {
@@ -76,14 +98,48 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
+# configuration for MySQL/MariaDB 10.3+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.environ.get("DB_NAME", "essenza"),
+        "USER": os.environ.get("DB_USER", "root"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "root"),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "PORT": os.environ.get("DB_PORT", "3306"),
+        "OPTIONS": {
+            "charset": "utf8mb4",
+            "collation": "utf8mb4_unicode_ci",
+            "init_command": (
+                "SET sql_mode='STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO';"
+                "SET innodb_strict_mode=1;"
+                "SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;"
+                "SET SESSION time_zone = '+00:00';"
+            ),
+            # MariaDB 10.3 compatibility settings
+            "isolation_level": "read committed",
+            "autocommit": True,
+            "connect_timeout": 60,
+            "read_timeout": 60,
+            "write_timeout": 60,
+        },
+        "TEST": {
+            "NAME": "test_essenza_dev",
+            "CHARSET": "utf8mb4",
+            "COLLATION": "utf8mb4_unicode_ci",
+        },
     }
 }
 
+# Cache configuration for development (using dummy cache)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+    }
+}
+
+# Email backend for development (console backend)
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Password hashers - untuk keamanan maksimal
 # https://docs.djangoproject.com/en/4.1/topics/auth/passwords/
@@ -207,6 +263,7 @@ REST_FRAMEWORK = {
     "UNAUTHENTICATED_USER": None,  # No default user object
     "UNAUTHENTICATED_TOKEN": None,  # No default token object
     "EXCEPTION_HANDLER": "core.handlers.drf_exception.custom_exception_handler",
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }
 
 # drf-spectacular Configuration
@@ -278,3 +335,45 @@ MIGRATION_MODULES = {
 
 # Database router to exclude certain tables
 DATABASE_ROUTERS = []
+
+# Development-specific settings
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]
+
+# Django Debug Toolbar (if installed)
+if "debug_toolbar" in INSTALLED_APPS:
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": lambda request: DEBUG,
+    }
+
+# File upload settings for development
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Time zone for development
+TIME_ZONE = "Asia/Jakarta"
+USE_TZ = True
+
+# Language settings
+USE_I18N = True
+USE_L10N = True
+
+# Session settings for development
+SESSION_COOKIE_AGE = 86400  # 1 day
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+JWT_SECRET = os.environ.get(
+    "JWT_SECRET", "Z7zl2n_ee-DKHEr7e7Dek7zV6YxVZON-ypQMUNhfm4ioYBPXtjhxCX1syq8"
+)
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRY_SECONDS = 3600  # 1 hour
+JWT_REFRESH_SIGNATURE = os.environ.get(
+    "JWT_REFRESH_SIGNATURE", "JTrFGGbDCxNdf6YcjtoVpcXaw1_K4Ppt1m_YzoEZE5o"
+)
+JWT_FERNET_KEY = os.environ.get(
+    "JWT_FERNET_KEY", "soJLqlAzc2ESzvr3NTbeZ8TqT7VgmmW5g-KUYiKyihE="
+)
