@@ -324,6 +324,10 @@ SPECTACULAR_SETTINGS = {
             "name": "Internal / Social Media",
             "description": "Social media links management",
         },
+        {
+            "name": "Internal / Menu",
+            "description": "Application menu management",
+        },
     ],
 }
 
@@ -370,7 +374,8 @@ JWT_SECRET = os.environ.get(
     "JWT_SECRET", "Z7zl2n_ee-DKHEr7e7Dek7zV6YxVZON-ypQMUNhfm4ioYBPXtjhxCX1syq8"
 )
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRY_SECONDS = 3600  # 1 hour
+# JWT_EXPIRY_SECONDS = 3600  # 1 hour
+JWT_EXPIRY_SECONDS = 86400  # 1 hour
 JWT_REFRESH_SIGNATURE = os.environ.get(
     "JWT_REFRESH_SIGNATURE", "JTrFGGbDCxNdf6YcjtoVpcXaw1_K4Ppt1m_YzoEZE5o"
 )
