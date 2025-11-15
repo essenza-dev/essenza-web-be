@@ -37,3 +37,29 @@ class SettingService(BaseService):
             return Setting.objects.get(slug=slug)
         except Setting.DoesNotExist:
             return None
+
+    def update_setting_by_slug(
+        self, slug: str, **update_data
+    ) -> Tuple[Setting, Exception | None]:
+        """
+        Update a specific setting by its slug
+        """
+        setting = self.get_setting_by_slug(slug)
+        if not setting:
+            return Setting(), Exception(f"Setting with slug '{slug}' does not exist.")
+
+        for key, value in update_data.items():
+            setattr(setting, key, value)
+        setting.save()
+        return setting, None
+
+    def delete_setting_by_slug(self, slug: str) -> Exception | None:
+        """
+        Delete a specific setting by its slug
+        """
+        setting = self.get_setting_by_slug(slug)
+        if not setting:
+            return Exception(f"Setting with slug '{slug}' does not exist.")
+
+        setting.delete()
+        return None
