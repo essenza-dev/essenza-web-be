@@ -220,3 +220,105 @@ class SettingApi:
             return func(*args, **kwargs)
 
         return wrapper
+
+    @staticmethod
+    def update_specific_setting(func):
+        @extend_schema(
+            operation_id="int_v1_specific_setting_update",
+            tags=TAGS,
+            summary="Update Specific Application Setting",
+            description="Endpoint to update a specific application setting by its slug.",
+            request=serializers.PatchUpdateSettingRequest,
+            responses={
+                200: {
+                    "description": "Setting updated successfully",
+                    "type": "object",
+                    "properties": {
+                        "success": {"type": "boolean", "example": True},
+                        "status_code": {"type": "integer", "example": 200},
+                        "message": {
+                            "type": "string",
+                            "example": "Setting retrieved successfully",
+                        },
+                        "data": {
+                            "type": "object",
+                            "properties": {
+                                "id": {"type": "integer", "example": 3},
+                                "slug": {"type": "string", "example": "site-logo"},
+                                "label": {"type": "string", "example": "Site Logo"},
+                                "value": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "example": "https://mysite.com/assets/logo.png",
+                                },
+                                "description": {"type": "string", "example": ""},
+                                "is_active": {"type": "boolean", "example": True},
+                                "created_at": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-14T02:40:02.893665+07:00",
+                                },
+                                "updated_at": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-14T02:40:02.893714+07:00",
+                                },
+                            },
+                        },
+                        "meta": {
+                            "type": "object",
+                            "properties": {
+                                "timestamp": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-14T02:47:35.550732",
+                                }
+                            },
+                        },
+                    },
+                }
+            },
+        )
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    @staticmethod
+    def delete_specific_setting(func):
+        @extend_schema(
+            operation_id="int_v1_specific_setting_delete",
+            tags=TAGS,
+            summary="Delete Specific Application Setting",
+            description="Endpoint to delete a specific application setting by its slug.",
+            responses={
+                200: {
+                    "description": "Setting deleted successfully",
+                    "type": "object",
+                    "properties": {
+                        "success": {"type": "boolean", "example": True},
+                        "status_code": {"type": "integer", "example": 200},
+                        "message": {
+                            "type": "string",
+                            "example": "Setting deleted successfully",
+                        },
+                        "meta": {
+                            "type": "object",
+                            "properties": {
+                                "timestamp": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "example": "2025-11-14T02:47:35.550732",
+                                }
+                            },
+                        },
+                    },
+                }
+            },
+        )
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper

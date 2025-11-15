@@ -1,12 +1,9 @@
-from typing import Any
-
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from apps.internal.setting import serializers
 from core.decorators.authentication import jwt_required
 from core.decorators.validation import validate_body
-from core.models import Setting
 from core.views import BaseViewSet
 from services import SettingService
 from docs.api.internal import SettingApi
@@ -62,16 +59,33 @@ class SettingsViewSet(BaseViewSet):
         else:
             return api_response(request).not_found(message="Setting not found")
 
+    @SettingApi.update_specific_setting
     @jwt_required
-    def update_specific_setting(self, request: Request, slug: str) -> Response:
+    @validate_body(serializers.PatchUpdateSettingRequest)
+    def update_specific_setting(
+        self, request: Request, slug: str, validated_data
+    ) -> Response:
         """
         Update a specific setting by its slug
         """
-        return api_response(request).success(message="Not implemented yet")
+        setting, error = self._setting_service.update_setting_by_slug(
+            slug, **validated_data
+        )
+        if error:
+            return api_response(request).error(message=str(error))
 
+        return api_response(request).success(
+            message="Setting updated successfully",
+            data=serializers.SettingModelSerializer(setting).data,
+        )
+
+    @SettingApi.delete_specific_setting
     @jwt_required
     def delete_specific_setting(self, request: Request, slug: str) -> Response:
         """
         Delete a specific setting by its slug
         """
-        return api_response(request).success(message="Not implemented yet")
+        error = self._setting_service.delete_setting_by_slug(slug)
+        if error:
+            return api_response(request).error(message=str(error))
+        return api_response(request).success(message="Setting deleted successfully")

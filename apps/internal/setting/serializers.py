@@ -17,8 +17,21 @@ class PostCreateSettingRequest(serializers.Serializer):
     Serializer for creating or updating application settings
     """
 
-    slug = serializers.CharField(max_length=100, required=False, allow_blank=True, allow_null=True)
+    slug = serializers.CharField(
+        max_length=100, required=False, allow_blank=True, allow_null=True
+    )
     label = serializers.CharField(max_length=100, required=True)
     value = serializers.CharField()
     description = serializers.CharField(allow_blank=True, required=False)
     is_active = serializers.BooleanField(required=True)
+
+
+class PatchUpdateSettingRequest(serializers.Serializer):
+    """
+    Serializer for updating application settings
+    """
+
+    label = serializers.CharField(max_length=100, required=False)
+    value = serializers.CharField(required=False)
+    description = serializers.CharField(allow_blank=True, required=False)
+    is_active = serializers.BooleanField(required=False)
