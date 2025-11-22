@@ -188,6 +188,10 @@ SPECTACULAR_SETTINGS = {
             "name": "Internal / Menu",
             "description": "Application menu management",
         },
+        {
+            "name": "Internal / Menu Item",
+            "description": "Application menu item management",
+        },
     ],
 }
 
