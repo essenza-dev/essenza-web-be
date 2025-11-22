@@ -344,3 +344,8 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# SonarQube scanner files
+.scannerwork/
+sonar-report.json
+.sonar/

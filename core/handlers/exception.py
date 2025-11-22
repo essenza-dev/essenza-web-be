@@ -8,7 +8,7 @@ import traceback
 import json
 import sys
 from datetime import datetime
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any
 from django.conf import settings
 from django.http import HttpRequest, JsonResponse
 from rest_framework.exceptions import (
@@ -204,7 +204,7 @@ class ExceptionHandler:
             'content_type': request.META.get('CONTENT_TYPE', ''),
         }
 
-    def _extract_user_info(self, request: HttpRequest) -> Dict[str, Union[bool, int, str, None]]:
+    def _extract_user_info(self, request: HttpRequest) -> Dict[str, bool | int | str | None]:
         """Extract user information safely"""
         if not hasattr(request, 'user'):
             return {'is_authenticated': False, 'id': None, 'username': None}
@@ -220,7 +220,7 @@ class ExceptionHandler:
             'username': getattr(user, 'username', None) if is_authenticated else None,
         }
 
-    def _extract_session_info(self, request: HttpRequest) -> Dict[str, Union[str, Dict[str, Any], None]]:
+    def _extract_session_info(self, request: HttpRequest) -> Dict[str, str | Dict[str, Any] | None]:
         """Extract session information safely"""
         if not hasattr(request, 'session'):
             return {'session_key': None, 'session_data': {}}
@@ -239,7 +239,7 @@ class ExceptionHandler:
             'FILES': list(request.FILES.keys()) if hasattr(request, 'FILES') else [],
         }
 
-    def _extract_server_info(self) -> Dict[str, Union[str, bool]]:
+    def _extract_server_info(self) -> Dict[str, str | bool]:
         """Extract server environment information"""
         return {
             'django_version': getattr(settings, 'DJANGO_VERSION', 'Unknown'),
@@ -280,7 +280,7 @@ class ExceptionHandler:
     def _format_exception_message(self, context: Dict[str, Any]) -> str:
         """Format human-readable exception message"""
         user_display: str = context['user']['username'] or 'Anonymous'
-        user_id: Union[int, str, None] = context['user']['id']
+        user_id: int | str | None = context['user']['id']
         user_agent: str = context['request']['user_agent'][:self._USER_AGENT_MAX_LENGTH]
 
         return (

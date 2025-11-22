@@ -4,7 +4,58 @@ Development Django settings for config project.
 This module contains development-specific settings.
 """
 
-from .base import *
+import os
+from .base import (
+    # Core Django settings
+    BASE_DIR,
+    SECRET_KEY,
+    INSTALLED_APPS,
+    MIDDLEWARE,
+    ROOT_URLCONF,
+    TEMPLATES,
+    WSGI_APPLICATION,
+    DATABASES,
+
+    # Internationalization
+    LANGUAGE_CODE,
+    TIME_ZONE,
+    USE_I18N,
+    USE_L10N,
+    USE_TZ,
+
+    # Static files
+    STATIC_URL,
+    STATIC_ROOT,
+
+    # Django configuration
+    DEFAULT_AUTO_FIELD,
+    PASSWORD_HASHERS,
+    SILENCED_SYSTEM_CHECKS,
+
+    # DRF settings
+    REST_FRAMEWORK,
+    SPECTACULAR_SETTINGS,
+
+    # Database and migrations
+    MIGRATION_MODULES,
+    DATABASE_ROUTERS,
+
+    # File uploads
+    FILE_UPLOAD_MAX_MEMORY_SIZE,
+    DATA_UPLOAD_MAX_MEMORY_SIZE,
+
+    # Session configuration
+    SESSION_COOKIE_AGE,
+    SESSION_SAVE_EVERY_REQUEST,
+    SESSION_EXPIRE_AT_BROWSER_CLOSE,
+
+    # JWT settings
+    JWT_SECRET,
+    JWT_ALGORITHM,
+    JWT_EXPIRY_SECONDS,
+    JWT_REFRESH_SIGNATURE,
+    JWT_FERNET_KEY,
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -41,6 +92,9 @@ CACHES = {
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Logging configuration for development
+STREAM_HANDLER_CLASS = "logging.StreamHandler"
+FILE_HANDLER_CLASS = "logging.FileHandler"
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -62,23 +116,23 @@ LOGGING = {
     },
     "handlers": {
         "console": {
-            "class": "logging.StreamHandler",
+            "class": STREAM_HANDLER_CLASS,
             "formatter": "detailed",
             "level": "INFO",
         },
         "request_console": {
-            "class": "logging.StreamHandler",
+            "class": STREAM_HANDLER_CLASS,
             "formatter": "request",
             "level": "INFO",
         },
         "exception_file": {
-            "class": "logging.FileHandler",
+            "class": FILE_HANDLER_CLASS,
             "filename": BASE_DIR / "logs" / "exceptions_dev.log",
             "formatter": "detailed",
             "level": "ERROR",
         },
         "exception_console": {
-            "class": "logging.StreamHandler",
+            "class": STREAM_HANDLER_CLASS,
             "formatter": "detailed",
             "level": "ERROR",
         },

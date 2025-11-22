@@ -10,6 +10,8 @@ class SocialMediaService(BaseService):
     Service class for managing social media entities and operations
     """
 
+    SOCIAL_MEDIA_NOT_FOUND_ERROR = "Social media entry not found"
+
     def get_social_media_list(
         self, str_page_number: str = "1", str_page_size: str = "20"
     ) -> Page:
@@ -55,7 +57,7 @@ class SocialMediaService(BaseService):
             socmed = SocialMedia.objects.get(pk=pk)
             return socmed, None
         except SocialMedia.DoesNotExist:
-            return None, Exception("Social media entry not found")
+            return None, Exception(self.SOCIAL_MEDIA_NOT_FOUND_ERROR)
         except Exception as e:
             return None, e
 
@@ -72,7 +74,7 @@ class SocialMediaService(BaseService):
             socmed.save()
             return socmed, None
         except SocialMedia.DoesNotExist:
-            return None, Exception("Social media entry not found")
+            return None, Exception(self.SOCIAL_MEDIA_NOT_FOUND_ERROR)
         except Exception as e:
             return None, e
 
@@ -85,6 +87,6 @@ class SocialMediaService(BaseService):
             socmed.delete()
             return None
         except SocialMedia.DoesNotExist:
-            return Exception("Social media entry not found")
+            return Exception(self.SOCIAL_MEDIA_NOT_FOUND_ERROR)
         except Exception as e:
             return e

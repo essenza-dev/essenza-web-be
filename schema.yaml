@@ -145,12 +145,23 @@ paths:
                         example: '2025-11-05T17:39:56.395438'
           description: ''
   /int/v1/auth/me:
-    get:
-      operationId: int_v1_auth_profile
-      description: Endpoint to retrieve the profile of the authenticated user
-      summary: Get Authenticated User Profile
+    patch:
+      operationId: int_v1_auth_profile_update
+      description: Endpoint to update the profile of the authenticated user
+      summary: Update Authenticated User Profile
       tags:
       - Internal / Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
       security:
       - BearerAuth: []
       - {}
@@ -159,7 +170,7 @@ paths:
           content:
             application/json:
               schema:
-                description: User profile retrieved successfully
+                description: User profile updated successfully
                 type: object
                 properties:
                   success:
@@ -170,7 +181,7 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: User profile retrieved successfully
+                    example: User profile updated successfully
                   data:
                     type: object
                     properties:
@@ -218,23 +229,12 @@ paths:
                         format: date-time
                         example: '2025-11-07T23:20:19.170921'
           description: ''
-    patch:
-      operationId: int_v1_auth_profile_update
-      description: Endpoint to update the profile of the authenticated user
-      summary: Update Authenticated User Profile
+    get:
+      operationId: int_v1_auth_profile
+      description: Endpoint to retrieve the profile of the authenticated user
+      summary: Get Authenticated User Profile
       tags:
       - Internal / Authentication
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
       security:
       - BearerAuth: []
       - {}
@@ -243,7 +243,7 @@ paths:
           content:
             application/json:
               schema:
-                description: User profile updated successfully
+                description: User profile retrieved successfully
                 type: object
                 properties:
                   success:
@@ -254,7 +254,7 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: User profile updated successfully
+                    example: User profile retrieved successfully
                   data:
                     type: object
                     properties:
@@ -359,81 +359,6 @@ paths:
                         example: '2025-11-05T17:39:56.395438'
           description: ''
   /int/v1/settings:
-    post:
-      operationId: int_v1_setting_create
-      description: Endpoint to create or update application settings.
-      summary: Create new Application Settings
-      tags:
-      - Internal / Settings
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PostCreateSettingRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PostCreateSettingRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PostCreateSettingRequestRequest'
-        required: true
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                description: Setting created successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 201
-                  message:
-                    type: string
-                    example: Setting created successfully
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 3
-                      slug:
-                        type: string
-                        example: site-logo
-                      label:
-                        type: string
-                        example: Site Logo
-                      value:
-                        type: string
-                        example: https://mysite.com/assets/logo.png
-                      description:
-                        type: string
-                        example: ''
-                      is_active:
-                        type: boolean
-                        example: true
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T02:40:02.893665+07:00'
-                      updated_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T02:40:02.893714+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T02:40:02.902052'
-          description: ''
     get:
       operationId: int_v1_complete_settings_retrieve
       description: Endpoint to retrieve application settings.
@@ -516,7 +441,163 @@ paths:
                         format: date-time
                         example: '2025-11-14T02:43:57.268135'
           description: ''
+    post:
+      operationId: int_v1_setting_create
+      description: Endpoint to create or update application settings.
+      summary: Create new Application Settings
+      tags:
+      - Internal / Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreateSettingRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostCreateSettingRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreateSettingRequestRequest'
+        required: true
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                description: Setting created successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: Setting created successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 3
+                      slug:
+                        type: string
+                        example: site-logo
+                      label:
+                        type: string
+                        example: Site Logo
+                      value:
+                        type: string
+                        example: https://mysite.com/assets/logo.png
+                      description:
+                        type: string
+                        example: ''
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T02:40:02.893665+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T02:40:02.893714+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T02:40:02.902052'
+          description: ''
   /int/v1/settings/{slug}:
+    patch:
+      operationId: int_v1_specific_setting_update
+      description: Endpoint to update a specific application setting by its slug.
+      summary: Update Specific Application Setting
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Internal / Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchUpdateSettingRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchUpdateSettingRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchUpdateSettingRequestRequest'
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Setting updated successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Setting retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 3
+                      slug:
+                        type: string
+                        example: site-logo
+                      label:
+                        type: string
+                        example: Site Logo
+                      value:
+                        type: string
+                        format: uri
+                        example: https://mysite.com/assets/logo.png
+                      description:
+                        type: string
+                        example: ''
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T02:40:02.893665+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T02:40:02.893714+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T02:47:35.550732'
+          description: ''
     get:
       operationId: int_v1_specific_setting_retrieve
       description: Endpoint to retrieve a specific application setting by its slug.
@@ -627,156 +708,7 @@ paths:
                         format: date-time
                         example: '2025-11-14T02:47:35.550732'
           description: ''
-    patch:
-      operationId: int_v1_specific_setting_update
-      description: Endpoint to update a specific application setting by its slug.
-      summary: Update Specific Application Setting
-      parameters:
-      - in: path
-        name: slug
-        schema:
-          type: string
-        required: true
-      tags:
-      - Internal / Settings
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchUpdateSettingRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchUpdateSettingRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchUpdateSettingRequestRequest'
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Setting updated successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Setting retrieved successfully
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 3
-                      slug:
-                        type: string
-                        example: site-logo
-                      label:
-                        type: string
-                        example: Site Logo
-                      value:
-                        type: string
-                        format: uri
-                        example: https://mysite.com/assets/logo.png
-                      description:
-                        type: string
-                        example: ''
-                      is_active:
-                        type: boolean
-                        example: true
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T02:40:02.893665+07:00'
-                      updated_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T02:40:02.893714+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T02:47:35.550732'
-          description: ''
   /int/v1/social-media:
-    post:
-      operationId: int_v1_social_media_create
-      description: Endpoint for creating a new social media setting
-      summary: Create Social Media
-      tags:
-      - Internal / Social Media
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PostCreateSocialMediaRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PostCreateSocialMediaRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PostCreateSocialMediaRequestRequest'
-        required: true
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                description: Social media data created successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 201
-                  message:
-                    type: string
-                    example: Social media data created successfully
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 3
-                      platform:
-                        type: string
-                        example: TikTok
-                      icon:
-                        type: string
-                        example: ''
-                      url:
-                        type: string
-                        example: https://tiktok.com
-                      order_no:
-                        type: integer
-                        example: 2
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-13T00:16:58.437634+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-13T00:16:58.443714'
-          description: ''
     get:
       operationId: int_v1_social_media_list
       description: Endpoint for retrieving social media settings with pagination support.
@@ -879,7 +811,148 @@ paths:
                             example: null
                             nullable: true
           description: ''
+    post:
+      operationId: int_v1_social_media_create
+      description: Endpoint for creating a new social media setting
+      summary: Create Social Media
+      tags:
+      - Internal / Social Media
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreateSocialMediaRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostCreateSocialMediaRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreateSocialMediaRequestRequest'
+        required: true
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                description: Social media data created successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: Social media data created successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 3
+                      platform:
+                        type: string
+                        example: TikTok
+                      icon:
+                        type: string
+                        example: ''
+                      url:
+                        type: string
+                        example: https://tiktok.com
+                      order_no:
+                        type: integer
+                        example: 2
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-13T00:16:58.437634+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-13T00:16:58.443714'
+          description: ''
   /int/v1/social-media/{id}:
+    patch:
+      operationId: int_v1_social_media_update
+      description: Endpoint for updating an existing social media setting
+      summary: Update Social Media
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Social Media
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchUpdateSocialMediaRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchUpdateSocialMediaRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchUpdateSocialMediaRequestRequest'
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Social media data updated successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Social media data updated successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      platform:
+                        type: string
+                        example: Instagram
+                      icon:
+                        type: string
+                        example: https://instagram/favicon.ico
+                      url:
+                        type: string
+                        example: https://instagram.com
+                      order_no:
+                        type: integer
+                        example: 0
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-13T00:13:57.304284+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T01:32:04.715422'
+          description: ''
     get:
       operationId: int_v1_social_media_retrieve
       description: Endpoint for retrieving a specific social media setting by its
@@ -983,29 +1056,13 @@ paths:
                         format: date-time
                         example: '2025-11-14T01:45:12.345678'
           description: ''
-    patch:
-      operationId: int_v1_social_media_update
-      description: Endpoint for updating an existing social media setting
-      summary: Update Social Media
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
+  /int/v1/menus:
+    get:
+      operationId: int_v1_get_menu
+      description: Endpoint to retrieve the application menu structure.
+      summary: Get Application Menu
       tags:
-      - Internal / Social Media
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchUpdateSocialMediaRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchUpdateSocialMediaRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchUpdateSocialMediaRequestRequest'
+      - Internal / Menu
       security:
       - BearerAuth: []
       - {}
@@ -1014,7 +1071,7 @@ paths:
           content:
             application/json:
               schema:
-                description: Social media data updated successfully
+                description: Menus retrieved successfully
                 type: object
                 properties:
                   success:
@@ -1025,38 +1082,37 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: Social media data updated successfully
+                    example: Menus retrieved successfully
                   data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 1
-                      platform:
-                        type: string
-                        example: Instagram
-                      icon:
-                        type: string
-                        example: https://instagram/favicon.ico
-                      url:
-                        type: string
-                        example: https://instagram.com
-                      order_no:
-                        type: integer
-                        example: 0
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-13T00:13:57.304284+07:00'
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 5
+                        items:
+                          type: array
+                          items: {}
+                          example: []
+                        name:
+                          type: string
+                          example: Contact
+                        position:
+                          type: string
+                          example: header
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-16T03:09:27.416438+07:00'
                   meta:
                     type: object
                     properties:
                       timestamp:
                         type: string
                         format: date-time
-                        example: '2025-11-14T01:32:04.715422'
+                        example: '2025-11-16T03:09:30.434680'
           description: ''
-  /int/v1/menus:
     post:
       operationId: int_v1_create_menu
       description: Endpoint to create a new application menu.
@@ -1161,12 +1217,30 @@ paths:
                         format: date-time
                         example: '2025-11-16T03:08:02.321171'
           description: ''
-    get:
-      operationId: int_v1_get_menu
-      description: Endpoint to retrieve the application menu structure.
-      summary: Get Application Menu
+  /int/v1/menus/{id}:
+    patch:
+      operationId: int_v1_specific_menu_update
+      description: Endpoint to update a specific application menu by its ID.
+      summary: Update Specific Application Menu
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
       - Internal / Menu
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchUpdateMenuRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchUpdateMenuRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchUpdateMenuRequestRequest'
       security:
       - BearerAuth: []
       - {}
@@ -1175,7 +1249,7 @@ paths:
           content:
             application/json:
               schema:
-                description: Menus retrieved successfully
+                description: Menu deleted successfully
                 type: object
                 properties:
                   success:
@@ -1186,38 +1260,77 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: Menus retrieved successfully
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                          example: 5
-                        items:
-                          type: array
-                          items: {}
-                          example: []
-                        name:
-                          type: string
-                          example: Contact
-                        position:
-                          type: string
-                          example: header
-                        created_at:
-                          type: string
-                          format: date-time
-                          example: '2025-11-16T03:09:27.416438+07:00'
+                    example: Menu deleted successfully
                   meta:
                     type: object
                     properties:
                       timestamp:
                         type: string
                         format: date-time
-                        example: '2025-11-16T03:09:30.434680'
+                        example: '2025-11-16T03:11:44.940787'
           description: ''
-  /int/v1/menus/{id}:
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Menu not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Menu with id '55' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-16T03:14:23.217170'
+          description: ''
+        '422':
+          content:
+            application/json:
+              schema:
+                description: Data validation failed
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 422
+                  message:
+                    type: string
+                    example: Data validation failed
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          example: name
+                        message:
+                          type: string
+                          example: This field may not be null.
+                        code:
+                          type: string
+                          example: 'null'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-16T03:15:29.496915'
+          description: ''
     get:
       operationId: int_v1_specific_menu_get
       description: Endpoint to retrieve a specific application menu by its ID.
@@ -1365,119 +1478,6 @@ paths:
                         type: string
                         format: date-time
                         example: '2025-11-16T03:10:46.083547'
-          description: ''
-    patch:
-      operationId: int_v1_specific_menu_update
-      description: Endpoint to update a specific application menu by its ID.
-      summary: Update Specific Application Menu
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - Internal / Menu
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchUpdateMenuRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchUpdateMenuRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchUpdateMenuRequestRequest'
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Menu deleted successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Menu deleted successfully
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-16T03:11:44.940787'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                description: Menu not found
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  status_code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: Menu with id '55' does not exist.
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-16T03:14:23.217170'
-          description: ''
-        '422':
-          content:
-            application/json:
-              schema:
-                description: Data validation failed
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  status_code:
-                    type: integer
-                    example: 422
-                  message:
-                    type: string
-                    example: Data validation failed
-                  errors:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        field:
-                          type: string
-                          example: name
-                        message:
-                          type: string
-                          example: This field may not be null.
-                        code:
-                          type: string
-                          example: 'null'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-16T03:15:29.496915'
           description: ''
   /int/v1/menus/{menu_id}/items:
     get:

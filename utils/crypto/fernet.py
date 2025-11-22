@@ -7,7 +7,7 @@ performance and comprehensive type safety using Python 3.10+ features.
 
 from __future__ import annotations
 
-from typing import Union, Optional, Final
+from typing import Optional, Final
 from cryptography.fernet import Fernet as CryptoFernet, InvalidToken
 from cryptography.exceptions import InvalidSignature
 
@@ -42,7 +42,7 @@ class Fernet:
     _ENCODING: Final[str] = "utf-8"
     _ASCII_ENCODING: Final[str] = "ascii"
 
-    def __init__(self, secret_key: Optional[Union[str, bytes]] = None) -> None:
+    def __init__(self, secret_key: Optional[str | bytes] = None) -> None:
         """
         Initialize Fernet encryption with optional secret key.
 
@@ -88,7 +88,7 @@ class Fernet:
         """
         return CryptoFernet.generate_key().decode("ascii")
 
-    def _prepare_data(self, data: Union[str, bytes]) -> bytes:
+    def _prepare_data(self, data: str | bytes) -> bytes:
         """
         Efficiently convert input data to bytes.
 
@@ -100,7 +100,7 @@ class Fernet:
         """
         return data.encode(self._ENCODING) if isinstance(data, str) else data
 
-    def encrypt(self, data: Union[str, bytes]) -> str:
+    def encrypt(self, data: str | bytes) -> str:
         """
         Encrypt data using Fernet symmetric encryption.
 
@@ -159,7 +159,7 @@ class Fernet:
         except UnicodeDecodeError as e:
             raise FernetDecryptionError(f"Failed to decode decrypted data: {e}") from e
 
-    def encrypt_json_safe(self, data: Union[str, bytes]) -> str:
+    def encrypt_json_safe(self, data: str | bytes) -> str:
         """
         Encrypt data and return JSON-safe base64 string.
 
@@ -179,7 +179,7 @@ class Fernet:
 
 
 # Utility functions for quick operations
-def encrypt_data(data: Union[str, bytes], secret_key: Optional[Union[str, bytes]] = None) -> str:
+def encrypt_data(data: str | bytes, secret_key: Optional[str | bytes] = None) -> str:
     """
     Quick utility function for encrypting data.
 
@@ -194,7 +194,7 @@ def encrypt_data(data: Union[str, bytes], secret_key: Optional[Union[str, bytes]
     return fernet.encrypt(data)
 
 
-def decrypt_data(token: str, secret_key: Union[str, bytes]) -> bytes:
+def decrypt_data(token: str, secret_key: str | bytes) -> bytes:
     """
     Quick utility function for decrypting data.
 
@@ -209,7 +209,7 @@ def decrypt_data(token: str, secret_key: Union[str, bytes]) -> bytes:
     return fernet.decrypt(token)
 
 
-def decrypt_to_string(token: str, secret_key: Union[str, bytes], encoding: str = "utf-8") -> str:
+def decrypt_to_string(token: str, secret_key: str | bytes, encoding: str = "utf-8") -> str:
     """
     Quick utility function for decrypting data to string.
 

@@ -7,7 +7,7 @@ using utils.response.
 """
 
 from functools import wraps
-from typing import Type, Union, Callable, Any, Optional, List, Dict
+from typing import Type, Callable, Any, Optional, List, Dict
 from enum import Enum
 
 from rest_framework import serializers
@@ -58,8 +58,8 @@ def _extract_request_from_args(*args, **kwargs) -> Request:
 
 
 def _get_data_from_source(
-    request: Request, data_source: Union[DataSource, str]
-) -> Union[Dict[str, Any], QueryDict, Any]:
+    request: Request, data_source: DataSource | str
+) -> Dict[str, Any] | QueryDict | Any:
     """
     Get data from specified source.
 
@@ -87,7 +87,7 @@ def _get_data_from_source(
 
 def validate_request(
     serializer_class: Type[serializers.Serializer],
-    data_source: Union[DataSource, str] = DataSource.BODY,
+    data_source: DataSource | str = DataSource.BODY,
 ) -> Callable[[Callable[..., Response]], Callable[..., Response]]:
     """
     Decorator for automatic request data validation using serializer.
@@ -114,28 +114,23 @@ def validate_request(
     def decorator(view_func: Callable[..., Response]) -> Callable[..., Response]:
         @wraps(view_func)
         def wrapper(*args, **kwargs) -> Response:
-            try:
-                request = _extract_request_from_args(*args, **kwargs)
-                data = _get_data_from_source(request, data_source)
+            request = _extract_request_from_args(*args, **kwargs)
+            data = _get_data_from_source(request, data_source)
 
-                # Initialize serializer with data
-                serializer = serializer_class(data=data)
+            # Initialize serializer with data
+            serializer = serializer_class(data=data)
 
-                # Validate data
-                if not serializer.is_valid():
-                    return api_response(request).validation_error(
-                        errors=serializer.errors, message="Data validation failed"
-                    )
+            # Validate data
+            if not serializer.is_valid():
+                return api_response(request).validation_error(
+                    errors=serializer.errors, message="Data validation failed"
+                )
 
-                # Add validated_data to kwargs
-                kwargs["validated_data"] = serializer.validated_data
+            # Add validated_data to kwargs
+            kwargs["validated_data"] = serializer.validated_data
 
-                # Call original function with validated_data
-                return view_func(*args, **kwargs)
-
-            except ValueError as e:
-                # Handle request extraction errors
-                raise e
+            # Call original function with validated_data
+            return view_func(*args, **kwargs)
 
         return wrapper
 
@@ -184,7 +179,7 @@ def validate_query_params(
 
 def validate_request_with_context(
     serializer_class: Type[serializers.Serializer],
-    data_source: Union[DataSource, str] = DataSource.BODY,
+    data_source: DataSource | str = DataSource.BODY,
     context_keys: Optional[List[str]] = None,
 ) -> Callable[[Callable[..., Response]], Callable[..., Response]]:
     """
@@ -208,35 +203,31 @@ def validate_request_with_context(
     def decorator(view_func: Callable[..., Response]) -> Callable[..., Response]:
         @wraps(view_func)
         def wrapper(*args, **kwargs) -> Response:
-            try:
-                request = _extract_request_from_args(*args, **kwargs)
-                data = _get_data_from_source(request, data_source)
+            request = _extract_request_from_args(*args, **kwargs)
+            data = _get_data_from_source(request, data_source)
 
-                # Build context for serializer
-                context: Dict[str, Any] = {"request": request}
+            # Build context for serializer
+            context: Dict[str, Any] = {"request": request}
 
-                # Add context keys if provided
-                if context_keys:
-                    context.update(
-                        {key: kwargs[key] for key in context_keys if key in kwargs}
-                    )
+            # Add context keys if provided
+            if context_keys:
+                context.update(
+                    {key: kwargs[key] for key in context_keys if key in kwargs}
+                )
 
-                # Initialize serializer with data and context
-                serializer = serializer_class(data=data, context=context)
+            # Initialize serializer with data and context
+            serializer = serializer_class(data=data, context=context)
 
-                # Validate data
-                if not serializer.is_valid():
-                    return api_response(request).validation_error(
-                        errors=serializer.errors, message="Data validation failed"
-                    )
+            # Validate data
+            if not serializer.is_valid():
+                return api_response(request).validation_error(
+                    errors=serializer.errors, message="Data validation failed"
+                )
 
-                # Add validated_data to kwargs
-                kwargs["validated_data"] = serializer.validated_data
+            # Add validated_data to kwargs
+            kwargs["validated_data"] = serializer.validated_data
 
-                return view_func(*args, **kwargs)
-
-            except ValueError as e:
-                raise e
+            return view_func(*args, **kwargs)
 
         return wrapper
 

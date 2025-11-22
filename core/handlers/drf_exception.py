@@ -81,27 +81,61 @@ def _extract_error_message(error_data: Any) -> str:
         A clean error message string
     """
     if isinstance(error_data, dict):
-        # Handle detail field
-        if 'detail' in error_data:
-            return str(error_data['detail'])
-
-        # Handle field-specific errors
-        if 'non_field_errors' in error_data:
-            errors = error_data['non_field_errors']
-            if isinstance(errors, list) and errors:
-                return str(errors[0])
-            return str(errors)
-
-        # Handle first field error
-        for field, errors in error_data.items():
-            if isinstance(errors, list) and errors:
-                return f"{field}: {errors[0]}"
-            return f"{field}: {errors}"
-
+        return _extract_dict_error_message(error_data)
     elif isinstance(error_data, list) and error_data:
         return str(error_data[0])
-
     elif isinstance(error_data, str):
         return error_data
+    return "An error occurred"
 
+
+def _extract_dict_error_message(error_dict: Dict[str, Any]) -> str:
+    """
+    Extract error message from dictionary-type error data.
+
+    Args:
+        error_dict: Dictionary containing error information
+
+    Returns:
+        Formatted error message string
+    """
+    # Handle detail field
+    if 'detail' in error_dict:
+        return str(error_dict['detail'])
+
+    # Handle non-field errors
+    if 'non_field_errors' in error_dict:
+        return _extract_non_field_errors(error_dict['non_field_errors'])
+
+    # Handle first field error
+    return _extract_first_field_error(error_dict)
+
+
+def _extract_non_field_errors(errors: Any) -> str:
+    """
+    Extract message from non-field errors.
+
+    Args:
+        errors: Non-field error data (could be list or other type)
+
+    Returns:
+        Error message string
+    """
+    return str(errors[0]) if isinstance(errors, list) and errors else str(errors)
+
+
+def _extract_first_field_error(error_dict: Dict[str, Any]) -> str:
+    """
+    Extract error message from the first field error in dictionary.
+
+    Args:
+        error_dict: Dictionary containing field errors
+
+    Returns:
+        Formatted field error message
+    """
+    for field, errors in error_dict.items():
+        if isinstance(errors, list) and errors:
+            return f"{field}: {errors[0]}"
+        return f"{field}: {errors}"
     return "An error occurred"

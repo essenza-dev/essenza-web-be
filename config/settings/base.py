@@ -13,10 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SILENCED_SYSTEM_CHECKS = ["urls.W002"]
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-07%ic$e*%_4g$0xfu9qo1+t%r#th52*d^&oswt@t5ky*@rm0vj",
-)
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # Application definition
 INSTALLED_APPS = [

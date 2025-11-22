@@ -57,8 +57,8 @@ class ExceptionHandlingMiddleware(MiddlewareMixin):
             JsonResponse for API exceptions, None for default Django handling
         """
         try:
-            # Handle the exception using our custom handler
-            context = exception_handler.handle_exception(request, exception)
+            # Handle the exception using our custom handler (logging and context collection)
+            exception_handler.handle_exception(request, exception)
 
             # Create appropriate response
             return exception_handler.create_error_response(request, exception)

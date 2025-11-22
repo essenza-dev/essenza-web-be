@@ -4,9 +4,14 @@ from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from drf_spectacular.plumbing import build_bearer_security_scheme_object
 
 
-def add_security_schemes(result, generator, request, public):
+def add_security_schemes(result, generator, **kwargs):
     """
     Postprocessing hook to ensure securitySchemes are included in the schema
+
+    Args:
+        result: The OpenAPI schema dictionary to modify
+        generator: The schema generator instance
+        **kwargs: Additional parameters (public, request) from DRF Spectacular
     """
     if 'components' not in result:
         result['components'] = {}

@@ -12,7 +12,7 @@ import hashlib
 import hmac
 import secrets
 import time
-from typing import Union, Optional
+from typing import Optional
 
 
 class Signature:
@@ -25,7 +25,7 @@ class Signature:
 
     __slots__ = ("_secret_key",)
 
-    def __init__(self, secret_key: Optional[Union[str, bytes]] = None) -> None:
+    def __init__(self, secret_key: Optional[str | bytes] = None) -> None:
         """
         Initialize the signature generator with a secret key.
 
@@ -59,11 +59,11 @@ class Signature:
         secret_key = base64.b64decode(b64_key)
         return cls(secret_key)
 
-    def _prepare_message(self, message: Union[str, bytes]) -> bytes:
+    def _prepare_message(self, message: str | bytes) -> bytes:
         """Convert message to bytes efficiently."""
         return message.encode("utf-8") if isinstance(message, str) else message
 
-    def generate_signature(self, message: Union[str, bytes]) -> str:
+    def generate_signature(self, message: str | bytes) -> str:
         """
         Generate HMAC-SHA256 signature for the given message.
 
@@ -77,7 +77,7 @@ class Signature:
         signature = hmac.new(self._secret_key, message_bytes, hashlib.sha256).digest()
         return base64.b64encode(signature).decode("ascii")
 
-    def verify_signature(self, message: Union[str, bytes], signature: str) -> bool:
+    def verify_signature(self, message: str | bytes, signature: str) -> bool:
         """
         Verify HMAC-SHA256 signature for the given message.
 
@@ -92,7 +92,7 @@ class Signature:
         return secrets.compare_digest(signature, expected_signature)
 
     def generate_timestamped_signature(
-        self, message: Union[str, bytes], timestamp: Optional[int] = None
+        self, message: str | bytes, timestamp: Optional[int] = None
     ) -> tuple[str, int]:
         """
         Generate signature with timestamp for time-sensitive operations.
@@ -113,7 +113,7 @@ class Signature:
 
     def verify_timestamped_signature(
         self,
-        message: Union[str, bytes],
+        message: str | bytes,
         signature: str,
         timestamp: int,
         max_age_seconds: int = 300,
@@ -143,7 +143,7 @@ def generate_secure_key() -> str:
     return base64.b64encode(secrets.token_bytes(32)).decode("ascii")
 
 
-def create_signature(message: Union[str, bytes], secret_key: Union[str, bytes]) -> str:
+def create_signature(message: str | bytes, secret_key: str | bytes) -> str:
     """
     Quick function to create HMAC-SHA256 signature.
 
@@ -159,7 +159,7 @@ def create_signature(message: Union[str, bytes], secret_key: Union[str, bytes]) 
 
 
 def verify_signature(
-    message: Union[str, bytes], signature: str, secret_key: Union[str, bytes]
+    message: str | bytes, signature: str, secret_key: str | bytes
 ) -> bool:
     """
     Quick function to verify HMAC-SHA256 signature.

@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable, Any, List, Type, Union
+from typing import Callable, Any, List, Type
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
 from rest_framework.request import Request
@@ -78,7 +78,7 @@ def jwt_refresh_token_required(view_func: Callable[..., Response]) -> Callable[.
 
 
 def jwt_role_required(
-    allowed_roles: Union[str, List[str]]
+    allowed_roles: str | List[str]
 ) -> Callable[[Callable[..., Response]], Callable[..., Response]]:
     """
     Decorator that enforces JWT authentication with role-based access control.

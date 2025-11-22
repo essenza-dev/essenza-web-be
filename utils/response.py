@@ -19,13 +19,11 @@ import contextlib
 from typing import Any, Dict, List, Optional, Union, TypeVar, Generic
 from datetime import datetime
 from functools import wraps, lru_cache
-import logging
 
 from pydantic import BaseModel, Field, validator
 from rest_framework import status
 from rest_framework.response import Response
 from django.core.paginator import Page
-from django.db.models import QuerySet
 
 # Type variables for generic support
 T = TypeVar("T")
@@ -415,7 +413,7 @@ def api_response_wrapper(success_message: str = "Operation completed successfull
                 builder = APIResponseBuilder(request)
                 return builder.success(data=result, message=success_message)
 
-            except Exception as e:
+            except Exception:
                 builder = APIResponseBuilder(request)
                 return builder.server_error(message="An unexpected error occurred")
 

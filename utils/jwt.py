@@ -1,9 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-# from django.utils import timezone
 from django.conf import settings
-from django.db import models
 from utils.crypto import Signature, Fernet
 import jwt
 
