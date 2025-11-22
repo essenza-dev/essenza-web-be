@@ -1,0 +1,557 @@
+name: 🔍 SonarQube Code Quality Analysis
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: sonar-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # SonarQube Configuration
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  SONAR_PROJECT_KEY: essenza-web-backend
+  SONAR_PROJECT_NAME: Essenza Web Backend
+
+  # SonarQube API Issue Filter Configuration
+  ISSUE_TYPES: BUG,VULNERABILITY,CODE_SMELL
+  ISSUE_SEVERITIES: BLOCKER,CRITICAL,MAJOR,MINOR,INFO
+  ISSUE_STATUSES: OPEN,CONFIRMED
+  ISSUES_PAGE_SIZE: 100
+
+jobs:
+  sonar-analysis:
+    name: 🔍 SonarQube Analysis
+    runs-on: self-hosted
+    timeout-minutes: 20
+
+    steps:
+      - name: 🛒 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better analysis
+
+      - name: ⚙️ Setup Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 📦 Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: 🔧 Install System Dependencies
+        run: |
+          echo "🔧 Installing system dependencies for MySQL client and analysis tools..."
+
+          # Update package list
+          sudo apt-get update -qq
+
+          # Install MySQL client development libraries and analysis tools
+          sudo apt-get install -y \
+            pkg-config \
+            default-libmysqlclient-dev \
+            build-essential \
+            python3-dev \
+            jq \
+            curl
+
+          echo "✅ System dependencies installed successfully"
+
+      - name: 📦 Install Python Dependencies
+        run: |
+          echo "📦 Installing Python dependencies..."
+
+          # Upgrade pip
+          python -m pip install --upgrade pip
+
+          # Install dependencies with better error handling
+          if [ -f requirements.txt ]; then
+            echo "📋 Installing from requirements.txt..."
+            pip install -r requirements.txt --verbose
+            echo "✅ Python dependencies installed successfully"
+
+            # Verify critical dependencies
+            echo "🔍 Verifying critical dependencies..."
+            python -c "import MySQLdb; print('✅ mysqlclient imported successfully')" 2>/dev/null || \
+            python -c "import django; print('✅ Django imported successfully')"
+          else
+            echo "⚠️ No requirements.txt found, skipping Python dependencies"
+          fi
+
+      - name: 🔍 Validate SonarQube Configuration
+        id: validate-config
+        run: |
+          echo "🔍 Validating SonarQube configuration..."
+
+          # Check if sonar-project.properties exists
+          if [ ! -f "sonar-project.properties" ]; then
+            echo "❌ ERROR: sonar-project.properties not found!"
+            echo "validation_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Check if SonarQube token is set
+          if [ -z "$SONAR_TOKEN" ]; then
+            echo "❌ ERROR: SONAR_TOKEN secret is not configured!"
+            echo "Please add SONAR_TOKEN to repository secrets"
+            echo "validation_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Check if SonarQube host URL is set
+          if [ -z "$SONAR_HOST_URL" ]; then
+            echo "❌ ERROR: SONAR_HOST_URL secret is not configured!"
+            echo "Please add SONAR_HOST_URL to repository secrets"
+            echo "validation_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Validate sonar-project.properties content
+          echo "📋 Checking sonar-project.properties configuration..."
+
+          PROJECT_KEY=$(grep "^sonar.projectKey" sonar-project.properties | cut -d'=' -f2)
+          SOURCE_DIRS=$(grep "^sonar.sources" sonar-project.properties | cut -d'=' -f2)
+
+          if [ -n "$PROJECT_KEY" ]; then
+            echo "✅ Project Key: $PROJECT_KEY"
+          else
+            echo "⚠️  WARNING: sonar.projectKey not found in properties file"
+          fi
+
+          if [ -n "$SOURCE_DIRS" ]; then
+            echo "✅ Source Directories: $SOURCE_DIRS"
+          else
+            echo "⚠️  WARNING: sonar.sources not found in properties file"
+          fi
+
+          echo "✅ SonarQube configuration validated successfully"
+          echo "validation_status=success" >> $GITHUB_OUTPUT
+
+      - name: 🔧 Setup SonarQube Scanner
+        if: steps.validate-config.outputs.validation_status == 'success'
+        run: |
+          echo "🔧 Setting up SonarQube Scanner..."
+
+          # Check if SonarQube Scanner is installed
+          if ! command -v sonar-scanner &> /dev/null; then
+            echo "📥 Installing SonarQube Scanner..."
+
+            # Download and install SonarQube Scanner
+            SCANNER_VERSION="5.0.1.3006"
+            wget -q https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SCANNER_VERSION}-linux.zip
+            unzip -q sonar-scanner-cli-${SCANNER_VERSION}-linux.zip
+            sudo mv sonar-scanner-${SCANNER_VERSION}-linux /opt/sonar-scanner
+            sudo ln -sf /opt/sonar-scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner
+
+            # Verify installation
+            sonar-scanner --version
+            echo "✅ SonarQube Scanner installed successfully"
+          else
+            echo "✅ SonarQube Scanner already available"
+            sonar-scanner --version
+          fi
+
+      - name: � Setup Analysis Environment
+        if: steps.validate-config.outputs.validation_status == 'success'
+        run: |
+          echo "� Setting up SonarQube analysis environment..."
+
+          # Create directory for analysis artifacts
+          mkdir -p sonar_artifacts
+
+          echo "✅ Analysis environment ready"
+
+      - name: 🔍 Run SonarQube Analysis
+        if: steps.validate-config.outputs.validation_status == 'success'
+        id: sonar-analysis
+        run: |
+          echo "🔍 Starting SonarQube analysis..."
+          echo "📊 Project: ${{ env.SONAR_PROJECT_KEY }}"
+          echo "🌐 Server: $SONAR_HOST_URL"
+          echo "📋 Focus: Security & Code Quality (Coverage disabled)"
+          echo ""
+
+          # Create analysis metadata
+          echo "## 📊 SonarQube Analysis Details" > analysis_summary.md
+          echo "" >> analysis_summary.md
+          echo "- **Project**: ${{ env.SONAR_PROJECT_KEY }}" >> analysis_summary.md
+          echo "- **Branch**: ${{ github.head_ref || github.ref_name }}" >> analysis_summary.md
+          echo "- **Commit**: ${{ github.sha }}" >> analysis_summary.md
+          echo "- **Triggered by**: ${{ github.event_name }}" >> analysis_summary.md
+          echo "- **Analysis Time**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> analysis_summary.md
+          echo "- **Configuration**: sonar-project.properties" >> analysis_summary.md
+          echo "" >> analysis_summary.md
+
+          # Community Edition: No branch parameters supported
+          # Only main branch analysis is available in Community Edition
+          echo "📋 SonarQube Community Edition Analysis"
+          echo "ℹ️  Community Edition analyzes code without branch/PR decoration"
+
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "🔀 Pull Request detected - analyzing PR code as main project"
+            echo "📋 PR Branch: ${{ github.head_ref }}"
+            echo "📋 Base Branch: ${{ github.base_ref }}"
+          else
+            echo "🌳 Direct push to ${{ github.ref_name }}"
+          fi
+
+          # Run SonarQube analysis using sonar-project.properties
+          echo "⚡ Executing SonarQube Scanner..."
+          echo "📋 Using configuration from sonar-project.properties"
+          set +e  # Don't exit on error, we want to capture the result
+
+          # Use sonar-project.properties file with minimal overrides
+          sonar-scanner \
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.token=$SONAR_TOKEN \
+            -Dsonar.scm.revision=${{ github.sha }} \
+            -Dsonar.verbose=false 2>&1 | tee sonar_output.log
+
+          SONAR_EXIT_CODE=${PIPESTATUS[0]}
+
+          # Parse analysis results
+          if [ $SONAR_EXIT_CODE -eq 0 ]; then
+            echo "analysis_status=success" >> $GITHUB_OUTPUT
+            echo "✅ SonarQube analysis completed successfully!"
+
+            # Extract dashboard URL (Community Edition - main project only)
+            DASHBOARD_URL="${SONAR_HOST_URL}/dashboard?id=${{ env.SONAR_PROJECT_KEY }}"
+            echo "dashboard_url=$DASHBOARD_URL" >> $GITHUB_OUTPUT
+
+            echo "" >> analysis_summary.md
+            echo "## ✅ Analysis Result: SUCCESS" >> analysis_summary.md
+            echo "" >> analysis_summary.md
+            echo "🎉 **SonarQube analysis completed successfully!**" >> analysis_summary.md
+            echo "" >> analysis_summary.md
+            echo "📋 **View Details**: [SonarQube Dashboard]($DASHBOARD_URL)" >> analysis_summary.md
+            echo "" >> analysis_summary.md
+
+            # Add Community Edition info
+            echo "### ℹ️ SonarQube Community Edition" >> analysis_summary.md
+            echo "" >> analysis_summary.md
+            echo "**Limitations:**" >> analysis_summary.md
+            echo "- No Pull Request decoration support" >> analysis_summary.md
+            echo "- No branch-specific analysis" >> analysis_summary.md
+            echo "- Analysis shows overall project quality" >> analysis_summary.md
+            echo "" >> analysis_summary.md
+
+            if [ "${{ github.event_name }}" == "pull_request" ]; then
+              echo "**This PR Analysis:**" >> analysis_summary.md
+              echo "- Source Branch: **${{ github.head_ref }}**" >> analysis_summary.md
+              echo "- Target Branch: **${{ github.base_ref }}**" >> analysis_summary.md
+              echo "- Commit: \`${{ github.sha }}\`" >> analysis_summary.md
+              echo "" >> analysis_summary.md
+            fi
+
+          else
+            echo "analysis_status=failed" >> $GITHUB_OUTPUT
+            echo "❌ SonarQube analysis failed with exit code: $SONAR_EXIT_CODE"
+
+            # Set dashboard URL even for failed analysis
+            DASHBOARD_URL="${SONAR_HOST_URL}/dashboard?id=${{ env.SONAR_PROJECT_KEY }}"
+            echo "dashboard_url=$DASHBOARD_URL" >> $GITHUB_OUTPUT
+
+            # Extract error information
+            ERROR_LOG=$(tail -20 sonar_output.log | grep -E "(ERROR|WARN|Failed)" || echo "Check full logs for details")
+
+            echo "" >> analysis_summary.md
+            echo "## ❌ Analysis Result: FAILED" >> analysis_summary.md
+            echo "" >> analysis_summary.md
+            echo "💥 **SonarQube analysis failed with exit code: $SONAR_EXIT_CODE**" >> analysis_summary.md
+            echo "" >> analysis_summary.md
+            echo "🚨 **Quality Gate Status: FAILED**" >> analysis_summary.md
+            echo "" >> analysis_summary.md
+            echo "📋 **View Details**: [SonarQube Dashboard]($DASHBOARD_URL)" >> analysis_summary.md
+            echo "" >> analysis_summary.md
+            echo "### 🔍 Error Details:" >> analysis_summary.md
+            echo "\`\`\`" >> analysis_summary.md
+            echo "$ERROR_LOG" >> analysis_summary.md
+            echo "\`\`\`" >> analysis_summary.md
+            echo "" >> analysis_summary.md
+            echo "### 🛠️ Troubleshooting Steps:" >> analysis_summary.md
+            echo "1. Check the [full analysis logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> analysis_summary.md
+            echo "2. Review SonarQube project configuration" >> analysis_summary.md
+            echo "3. Verify code quality issues in the affected files" >> analysis_summary.md
+            echo "4. Check [SonarQube Server]($SONAR_HOST_URL) accessibility" >> analysis_summary.md
+          fi
+
+      - name: � Fetch SonarQube Issues
+        if: steps.sonar-analysis.outputs.analysis_status == 'success'
+        id: fetch-issues
+        run: |
+          echo "🔍 Fetching issues from SonarQube API..."
+
+          # Fetch issues from SonarQube Web API
+          PROJECT_KEY="${{ env.SONAR_PROJECT_KEY }}"
+          # Only fetch OPEN issues (exclude resolved/closed ones)
+          API_URL="${SONAR_HOST_URL}/api/issues/search?componentKeys=${PROJECT_KEY}&types=${{ env.ISSUE_TYPES }}&severities=${{ env.ISSUE_SEVERITIES }}&statuses=${{ env.ISSUE_STATUSES }}&ps=${{ env.ISSUES_PAGE_SIZE }}"
+
+          # Fetch issues using curl (without auth for public instances, add auth if needed)
+          echo "📋 Fetching from: $API_URL"
+
+          set +e  # Don't exit on curl error
+          curl -s -H "Authorization: Bearer $SONAR_TOKEN" "$API_URL" > sonar_issues.json 2>/dev/null
+          CURL_EXIT_CODE=$?
+
+          if [ $CURL_EXIT_CODE -eq 0 ] && [ -f sonar_issues.json ]; then
+            # Check if we have valid JSON response
+            if jq empty sonar_issues.json 2>/dev/null; then
+              echo "✅ Successfully fetched issues from SonarQube API"
+
+              # Debug: Show raw API response info
+              echo "🔍 API Response Debug:"
+              echo "  - Raw total from API: $(jq '.total // 0' sonar_issues.json)"
+              echo "  - Issues array length: $(jq '.issues | length' sonar_issues.json 2>/dev/null || echo 0)"
+              echo "  - Paging info: $(jq '.paging' sonar_issues.json 2>/dev/null || echo 'null')"
+
+              # Parse issues and create summary
+              TOTAL_ISSUES=$(jq '.total // 0' sonar_issues.json)
+              BUGS=$(jq '.issues[] | select(.type == "BUG") | .type' sonar_issues.json 2>/dev/null | wc -l | tr -d ' ')
+              VULNERABILITIES=$(jq '.issues[] | select(.type == "VULNERABILITY") | .type' sonar_issues.json 2>/dev/null | wc -l | tr -d ' ')
+              CODE_SMELLS=$(jq '.issues[] | select(.type == "CODE_SMELL") | .type' sonar_issues.json 2>/dev/null | wc -l | tr -d ' ')
+
+              # Debug: Show status breakdown
+              echo "  - Open issues: $(jq '.issues[] | select(.status == "OPEN") | .status' sonar_issues.json 2>/dev/null | wc -l | tr -d ' ')"
+              echo "  - Confirmed issues: $(jq '.issues[] | select(.status == "CONFIRMED") | .status' sonar_issues.json 2>/dev/null | wc -l | tr -d ' ')"
+              echo "  - Resolved issues: $(jq '.issues[] | select(.status == "RESOLVED") | .status' sonar_issues.json 2>/dev/null | wc -l | tr -d ' ')"
+
+              echo "total_issues=$TOTAL_ISSUES" >> $GITHUB_OUTPUT
+              echo "bugs=$BUGS" >> $GITHUB_OUTPUT
+              echo "vulnerabilities=$VULNERABILITIES" >> $GITHUB_OUTPUT
+              echo "code_smells=$CODE_SMELLS" >> $GITHUB_OUTPUT
+              echo "api_success=true" >> $GITHUB_OUTPUT
+
+              # Create detailed issues list for top issues
+              echo "📋 Parsing top issues..."
+              jq -r '.issues[0:10] | .[] | "- **\(.severity)** \(.type): \(.message) (\(.component | split(":")[1] // "Unknown"):\(.line // "N/A"))"' sonar_issues.json 2>/dev/null > top_issues.txt || echo "No detailed issues to display" > top_issues.txt
+
+              echo "📊 Analysis Summary:"
+              echo "  - Total Issues: $TOTAL_ISSUES"
+              echo "  - Bugs: $BUGS"
+              echo "  - Vulnerabilities: $VULNERABILITIES"
+              echo "  - Code Smells: $CODE_SMELLS"
+
+            else
+              echo "❌ Invalid JSON response from SonarQube API"
+              echo "api_success=false" >> $GITHUB_OUTPUT
+              echo "total_issues=0" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "❌ Failed to fetch issues from SonarQube API (curl exit code: $CURL_EXIT_CODE)"
+            echo "This might be due to network issues, authentication, or API limitations"
+            echo "api_success=false" >> $GITHUB_OUTPUT
+            echo "total_issues=0" >> $GITHUB_OUTPUT
+
+            # Create fallback message
+            echo "API fetch failed - please check SonarQube dashboard manually" > top_issues.txt
+          fi
+
+          # Try to get project metrics as well (often more accurate than issues API)
+          echo ""
+          echo "🔍 Fetching project metrics for comparison..."
+          METRICS_URL="${SONAR_HOST_URL}/api/measures/component?component=${PROJECT_KEY}&metricKeys=bugs,vulnerabilities,code_smells,reliability_rating,security_rating,sqale_rating"
+
+          set +e
+          curl -s -H "Authorization: Bearer $SONAR_TOKEN" "$METRICS_URL" > sonar_metrics.json 2>/dev/null
+          METRICS_EXIT_CODE=$?
+
+          if [ $METRICS_EXIT_CODE -eq 0 ] && [ -f sonar_metrics.json ]; then
+            if jq empty sonar_metrics.json 2>/dev/null; then
+              echo "✅ Successfully fetched project metrics"
+
+              # Parse metrics
+              METRIC_BUGS=$(jq -r '.component.measures[] | select(.metric == "bugs") | .value // "0"' sonar_metrics.json 2>/dev/null)
+              METRIC_VULNERABILITIES=$(jq -r '.component.measures[] | select(.metric == "vulnerabilities") | .value // "0"' sonar_metrics.json 2>/dev/null)
+              METRIC_CODE_SMELLS=$(jq -r '.component.measures[] | select(.metric == "code_smells") | .value // "0"' sonar_metrics.json 2>/dev/null)
+
+              echo "📊 Dashboard Metrics (more accurate):"
+              echo "  - Bugs: $METRIC_BUGS"
+              echo "  - Vulnerabilities: $METRIC_VULNERABILITIES"
+              echo "  - Code Smells: $METRIC_CODE_SMELLS"
+
+              # Use metrics if available and different from issues count
+              if [ -n "$METRIC_BUGS" ] && [ "$METRIC_BUGS" != "null" ]; then
+                echo "dashboard_bugs=$METRIC_BUGS" >> $GITHUB_OUTPUT
+              fi
+              if [ -n "$METRIC_VULNERABILITIES" ] && [ "$METRIC_VULNERABILITIES" != "null" ]; then
+                echo "dashboard_vulnerabilities=$METRIC_VULNERABILITIES" >> $GITHUB_OUTPUT
+              fi
+              if [ -n "$METRIC_CODE_SMELLS" ] && [ "$METRIC_CODE_SMELLS" != "null" ]; then
+                echo "dashboard_code_smells=$METRIC_CODE_SMELLS" >> $GITHUB_OUTPUT
+              fi
+
+              # Calculate total from metrics
+              METRIC_TOTAL=$((METRIC_BUGS + METRIC_VULNERABILITIES + METRIC_CODE_SMELLS))
+              echo "dashboard_total=$METRIC_TOTAL" >> $GITHUB_OUTPUT
+              echo "metrics_success=true" >> $GITHUB_OUTPUT
+            else
+              echo "❌ Invalid metrics JSON response"
+              echo "metrics_success=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "❌ Failed to fetch metrics (curl exit code: $METRICS_EXIT_CODE)"
+            echo "metrics_success=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: �📊 Upload Analysis Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonarqube-analysis-results
+          path: |
+            sonar_output.log
+            analysis_summary.md
+            sonar_issues.json
+            sonar_metrics.json
+            top_issues.txt
+            .scannerwork/report-task.txt
+          retention-days: 30
+
+      - name: 📝 Comment on Pull Request
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            // Read analysis summary
+            let summaryContent = '## 🔍 SonarQube Analysis Report\n\n';
+
+            try {
+              if (fs.existsSync('analysis_summary.md')) {
+                summaryContent += fs.readFileSync('analysis_summary.md', 'utf8');
+              } else {
+                summaryContent += '❌ **Analysis summary not available**\n\nPlease check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.';
+              }
+            } catch (error) {
+              summaryContent += '❌ **Error reading analysis summary**\n\nPlease check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.';
+            }
+
+            // Add actual SonarQube issues if available
+            const apiSuccess = '${{ steps.fetch-issues.outputs.api_success }}' === 'true';
+            const metricsSuccess = '${{ steps.fetch-issues.outputs.metrics_success }}' === 'true';
+
+            // Use dashboard metrics if available (more accurate), otherwise use issues API
+            let totalIssues, bugs, vulnerabilities, codeSmells;
+
+            if (metricsSuccess) {
+              // Use dashboard metrics (matches what user sees in SonarQube)
+              totalIssues = parseInt('${{ steps.fetch-issues.outputs.dashboard_total }}') || 0;
+              bugs = parseInt('${{ steps.fetch-issues.outputs.dashboard_bugs }}') || 0;
+              vulnerabilities = parseInt('${{ steps.fetch-issues.outputs.dashboard_vulnerabilities }}') || 0;
+              codeSmells = parseInt('${{ steps.fetch-issues.outputs.dashboard_code_smells }}') || 0;
+              console.log('Using dashboard metrics for accuracy');
+            } else {
+              // Fallback to issues API
+              totalIssues = parseInt('${{ steps.fetch-issues.outputs.total_issues }}') || 0;
+              bugs = parseInt('${{ steps.fetch-issues.outputs.bugs }}') || 0;
+              vulnerabilities = parseInt('${{ steps.fetch-issues.outputs.vulnerabilities }}') || 0;
+              codeSmells = parseInt('${{ steps.fetch-issues.outputs.code_smells }}') || 0;
+              console.log('Using issues API as fallback');
+            }
+
+            if ((apiSuccess || metricsSuccess) && totalIssues > 0) {
+              summaryContent += '\n### 📊 Issues Found in SonarQube Dashboard\n\n';
+              summaryContent += `**Total Issues**: ${totalIssues}`;
+              if (metricsSuccess) {
+                summaryContent += ' *(from dashboard metrics)*\n';
+              } else {
+                summaryContent += ' *(from issues API)*\n';
+              }
+              if (bugs > 0) summaryContent += `- 🐛 **Bugs**: ${bugs}\n`;
+              if (vulnerabilities > 0) summaryContent += `- 🔒 **Security Vulnerabilities**: ${vulnerabilities}\n`;
+              if (codeSmells > 0) summaryContent += `- 💩 **Code Smells**: ${codeSmells}\n`;
+
+              summaryContent += '\n#### Top Issues:\n';
+
+              try {
+                if (fs.existsSync('top_issues.txt')) {
+                  const topIssues = fs.readFileSync('top_issues.txt', 'utf8').trim();
+                  if (topIssues && topIssues !== 'No detailed issues to display') {
+                    summaryContent += topIssues + '\n';
+                  } else {
+                    summaryContent += '*No detailed issue information available*\n';
+                  }
+                } else {
+                  summaryContent += '*Issue details not available*\n';
+                }
+              } catch (error) {
+                summaryContent += '*Error reading issue details*\n';
+              }
+
+              // Ensure dashboard URL is always available
+              const dashboardUrl = '${{ steps.sonar-analysis.outputs.dashboard_url }}' || '${{ env.SONAR_HOST_URL }}/dashboard?id=${{ env.SONAR_PROJECT_KEY }}';
+              summaryContent += `\n📋 **Review all issues**: [SonarQube Dashboard](${dashboardUrl})\n`;
+
+            } else if ((apiSuccess || metricsSuccess) && totalIssues === 0) {
+              summaryContent += '\n### ✅ No Issues Found\n\n';
+              summaryContent += '🎉 **Great work!** No bugs, vulnerabilities, or code smells detected in the current analysis.\n';
+            } else {
+              summaryContent += '\n### ℹ️ Issue Details\n\n';
+              summaryContent += '⚠️ **Unable to fetch detailed issues from SonarQube API**\n\n';
+
+              // Ensure dashboard URL is available even if analysis failed
+              const dashboardUrl = '${{ steps.sonar-analysis.outputs.dashboard_url }}' || '${{ env.SONAR_HOST_URL }}/dashboard?id=${{ env.SONAR_PROJECT_KEY }}';
+              summaryContent += `Please check the [SonarQube Dashboard](${dashboardUrl}) directly for detailed issue information.\n`;
+            }
+
+            // Add footer
+            summaryContent += '\n\n---\n';
+            summaryContent += '*🤖 Automated analysis by [SonarQube GitHub Action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*';
+
+            // Find existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existingComment = comments.data.find(
+              comment => comment.body.includes('🔍 SonarQube Analysis Report')
+            );
+
+            // Create or update comment
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: summaryContent
+              });
+              console.log('Updated existing PR comment');
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: summaryContent
+              });
+              console.log('Created new PR comment');
+            }
+
+      - name: 🎯 Set Job Status
+        if: always()
+        run: |
+          if [ "${{ steps.sonar-analysis.outputs.analysis_status }}" == "success" ]; then
+            echo "🎉 SonarQube analysis completed successfully!"
+            echo ""
+            echo "📋 Dashboard: ${{ steps.sonar-analysis.outputs.dashboard_url }}"
+            exit 0
+          else
+            echo "💥 SonarQube analysis failed!"
+            echo ""
+            echo "🔍 Check the analysis summary and logs above for details"
+            echo "📋 Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            exit 1
+          fi
