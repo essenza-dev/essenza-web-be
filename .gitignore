@@ -321,7 +321,6 @@ celerybeat.pid
 dump.rdb
 
 # Docker
-.dockerignore
 docker-compose.override.yml
 
 # Backup files

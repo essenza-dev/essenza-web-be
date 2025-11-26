@@ -54,27 +54,25 @@ def retrieve_media(request: Request, file_path: str) -> Response | FileResponse:
     """
     try:
         # Construct full file path efficiently
-        base_media_path = Path(settings.BASE_DIR) / settings.FILE_UPLOAD_BASE_DIR
-        file_location = base_media_path / file_path
+        base_media_path = Path(settings.BASE_DIR, settings.FILE_UPLOAD_BASE_DIR)
+        file_location = Path.joinpath(base_media_path, file_path)
 
         # Early validation: check if path is a valid file
         if not file_location.is_file():
             return api_response(request).error(
-                message=f"File not found: {file_path}",
-                status_code=404
+                message=f"File not found: {file_path}", status_code=404
             )
 
         # Security validation: prevent directory traversal attacks
         try:
             file_location.resolve().relative_to(base_media_path.resolve())
         except ValueError:
-            return api_response(request).error(
-                message="Access denied",
-                status_code=403
-            )
+            return api_response(request).error(message="Access denied", status_code=403)
 
         # Determine MIME type with fallback
-        mime_type = mimetypes.guess_type(str(file_location))[0] or "application/octet-stream"
+        mime_type = (
+            mimetypes.guess_type(str(file_location))[0] or "application/octet-stream"
+        )
 
         # Extract filename once for reuse
         filename = file_location.name
@@ -94,12 +92,10 @@ def retrieve_media(request: Request, file_path: str) -> Response | FileResponse:
     except (OSError, IOError) as e:
         # Handle file system related errors specifically
         return api_response(request).error(
-            message=f"File access error: {str(e)}",
-            status_code=500
+            message=f"File access error: {str(e)}", status_code=500
         )
     except Exception as e:
         # Handle any other unexpected errors
         return api_response(request).error(
-            message=f"Unexpected error retrieving file: {str(e)}",
-            status_code=500
+            message=f"Unexpected error retrieving file: {str(e)}", status_code=500
         )
