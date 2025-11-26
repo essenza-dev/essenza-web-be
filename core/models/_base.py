@@ -4,7 +4,7 @@ Base/Abstract models for inheritance
 
 from __future__ import annotations
 
-from typing import Optional
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 
@@ -58,3 +58,16 @@ class SoftDeleteModel(BaseModel):
     def is_active(self) -> bool:
         """Check if the object is active (not soft deleted)."""
         return not self.is_deleted
+
+def upload_to(path: str) -> str:
+    """
+    Generate upload path for file fields.
+
+    Args:
+        instance (models.Model): The model instance.
+        filename (str): The original filename.
+
+    Returns:
+        str: The upload path.
+    """
+    return f"{settings.FILE_UPLOAD_BASE_DIR}uploads/{path}"

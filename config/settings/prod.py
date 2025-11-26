@@ -42,6 +42,7 @@ from .base import (
     DATABASE_ROUTERS,
 
     # File uploads
+    FILE_UPLOAD_BASE_DIR,
     FILE_UPLOAD_MAX_MEMORY_SIZE,
     DATA_UPLOAD_MAX_MEMORY_SIZE,
 

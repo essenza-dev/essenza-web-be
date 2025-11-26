@@ -192,6 +192,10 @@ SPECTACULAR_SETTINGS = {
             "name": "Internal / Menu Item",
             "description": "Application menu item management",
         },
+        {
+            "name": "Internal / Banner",
+            "description": "Application banner management",
+        },
     ],
 }
 
@@ -204,6 +208,7 @@ MIGRATION_MODULES = {
 DATABASE_ROUTERS = []
 
 # File upload settings
+FILE_UPLOAD_BASE_DIR = "media/"
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 

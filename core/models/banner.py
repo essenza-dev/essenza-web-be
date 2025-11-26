@@ -1,12 +1,15 @@
+from django.conf import settings
 from django.db import models
-from core.models._base import TimeStampedModel
+from core.models._base import TimeStampedModel, upload_to
 
 
 class Banner(TimeStampedModel):
     id = models.AutoField(primary_key=True, editable=False)
     title: models.CharField = models.CharField(max_length=255)
     subtitle: models.CharField = models.CharField(max_length=255, blank=True)
-    image: models.CharField = models.CharField(max_length=255)
+    image: models.ImageField = models.ImageField(
+        upload_to=upload_to("banner"), blank=True
+    )
     link_url: models.CharField = models.CharField(max_length=255, blank=True)
     order_no: models.IntegerField = models.IntegerField(default=0)
     is_active: models.BooleanField = models.BooleanField(default=True)

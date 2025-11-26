@@ -3,6 +3,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
 from apps.internal.social_media import serializers
+from docs.api.constants import DEFAULT_PAGINATION_PARAMS
 
 TAGS = ["Internal / Social Media"]
 
@@ -23,24 +24,7 @@ class SocialMediaAPI:
             tags=TAGS,
             summary="Fetch Social Media Settings",
             description="Endpoint for retrieving social media settings with pagination support. Use 'page' parameter to navigate through pages and 'page_size' to control items per page (max 100).",
-            parameters=[
-                OpenApiParameter(
-                    name="page",
-                    type=OpenApiTypes.INT,
-                    location=OpenApiParameter.QUERY,
-                    description="Page number (default: 1)",
-                    required=False,
-                    default=1,
-                ),
-                OpenApiParameter(
-                    name="page_size",
-                    type=OpenApiTypes.INT,
-                    location=OpenApiParameter.QUERY,
-                    description="Number of items per page (default: 20, max: 100)",
-                    required=False,
-                    default=20,
-                ),
-            ],
+            parameters=DEFAULT_PAGINATION_PARAMS,
             responses={
                 200: {
                     "description": "Social media data fetched successfully",

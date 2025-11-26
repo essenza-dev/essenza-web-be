@@ -3,6 +3,7 @@ from .setting import SettingApi
 from .social_media import SocialMediaAPI
 from .menu import MenuAPI
 from .menu_item import MenuItemAPI
+from .banner import BannerAPI
 
 __all__ = [
     "AuthenticationApi",
@@ -10,4 +11,5 @@ __all__ = [
     "SocialMediaAPI",
     "MenuAPI",
     "MenuItemAPI",
+    "BannerAPI",
 ]
