@@ -1,9 +1,10 @@
 from django.conf import settings
 from django.db import models
-from core.models._base import TimeStampedModel, upload_to
+
+from core.models._base import TimeStampedModel, FileUploadModel, upload_to
 
 
-class Banner(TimeStampedModel):
+class Banner(TimeStampedModel, FileUploadModel):
     id = models.AutoField(primary_key=True, editable=False)
     title: models.CharField = models.CharField(max_length=255)
     subtitle: models.CharField = models.CharField(max_length=255, blank=True)
