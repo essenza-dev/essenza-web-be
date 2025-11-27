@@ -78,13 +78,6 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# Production-specific reCAPTCHA settings
-# Both secret keys are required in production
-if not RECAPTCHA_V2_SECRET_KEY:
-    raise ValueError("RECAPTCHA_V2_SECRET_KEY is required in production")
-if not RECAPTCHA_V3_SECRET_KEY:
-    raise ValueError("RECAPTCHA_V3_SECRET_KEY is required in production")
-
 # Always enforce CAPTCHA verification in production
 FORCE_RECAPTCHA_VERIFICATION = True
 
