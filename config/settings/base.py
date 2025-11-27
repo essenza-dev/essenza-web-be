@@ -171,7 +171,9 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": "/api/",
     "DEFAULT_GENERATOR_CLASS": "drf_spectacular.generators.SchemaGenerator",
     "TAGS": [
+        # General Tags
         {"name": "General", "description": "General purpose endpoints"},
+        # Internal API Tags
         {
             "name": "Internal / Authentication",
             "description": "Authentication related endpoints",
@@ -195,6 +197,15 @@ SPECTACULAR_SETTINGS = {
         {
             "name": "Internal / Banner",
             "description": "Application banner management",
+        },
+        {
+            "name": "Internal / Subscriber",
+            "description": "Application subscriber management",
+        },
+        # Public API Tags
+        {
+            "name": "Public / Subscriber",
+            "description": "Application subscriber management",
         },
     ],
 }

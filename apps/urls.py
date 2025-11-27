@@ -40,6 +40,7 @@ urlpatterns = [
     path("health", views.health_check, name="health_check"),
     # Internal app routes
     path("int", include("apps.internal.urls")),
+    path("pub", include("apps.public.urls")),
     # Media retrieval endpoint
     path("media/<path:file_path>", views.retrieve_media, name="retrieve_media"),
 ]
