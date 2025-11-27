@@ -5,6 +5,7 @@ from .setting.service import SettingService
 from .menu.service import MenuService
 from .menu_item.service import MenuItemService
 from .banner.service import BannerService
+from .subscriber.service import SubscriberService
 
 __all__ = [
     "AuthService",
@@ -14,4 +15,5 @@ __all__ = [
     "MenuService",
     "MenuItemService",
     "BannerService",
+    "SubscriberService",
 ]
