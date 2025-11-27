@@ -145,23 +145,12 @@ paths:
                         example: '2025-11-05T17:39:56.395438'
           description: ''
   /int/v1/auth/me:
-    patch:
-      operationId: int_v1_auth_profile_update
-      description: Endpoint to update the profile of the authenticated user
-      summary: Update Authenticated User Profile
+    get:
+      operationId: int_v1_auth_profile
+      description: Endpoint to retrieve the profile of the authenticated user
+      summary: Get Authenticated User Profile
       tags:
       - Internal / Authentication
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
       security:
       - BearerAuth: []
       - {}
@@ -170,7 +159,7 @@ paths:
           content:
             application/json:
               schema:
-                description: User profile updated successfully
+                description: User profile retrieved successfully
                 type: object
                 properties:
                   success:
@@ -181,7 +170,7 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: User profile updated successfully
+                    example: User profile retrieved successfully
                   data:
                     type: object
                     properties:
@@ -229,12 +218,23 @@ paths:
                         format: date-time
                         example: '2025-11-07T23:20:19.170921'
           description: ''
-    get:
-      operationId: int_v1_auth_profile
-      description: Endpoint to retrieve the profile of the authenticated user
-      summary: Get Authenticated User Profile
+    patch:
+      operationId: int_v1_auth_profile_update
+      description: Endpoint to update the profile of the authenticated user
+      summary: Update Authenticated User Profile
       tags:
       - Internal / Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
       security:
       - BearerAuth: []
       - {}
@@ -243,7 +243,7 @@ paths:
           content:
             application/json:
               schema:
-                description: User profile retrieved successfully
+                description: User profile updated successfully
                 type: object
                 properties:
                   success:
@@ -254,7 +254,7 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: User profile retrieved successfully
+                    example: User profile updated successfully
                   data:
                     type: object
                     properties:
@@ -517,10 +517,10 @@ paths:
                         example: '2025-11-14T02:40:02.902052'
           description: ''
   /int/v1/settings/{slug}:
-    patch:
-      operationId: int_v1_specific_setting_update
-      description: Endpoint to update a specific application setting by its slug.
-      summary: Update Specific Application Setting
+    get:
+      operationId: int_v1_specific_setting_retrieve
+      description: Endpoint to retrieve a specific application setting by its slug.
+      summary: Retrieve Specific Application Setting
       parameters:
       - in: path
         name: slug
@@ -529,17 +529,6 @@ paths:
         required: true
       tags:
       - Internal / Settings
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchUpdateSettingRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchUpdateSettingRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchUpdateSettingRequestRequest'
       security:
       - BearerAuth: []
       - {}
@@ -548,7 +537,7 @@ paths:
           content:
             application/json:
               schema:
-                description: Setting updated successfully
+                description: Setting retrieved successfully
                 type: object
                 properties:
                   success:
@@ -598,10 +587,10 @@ paths:
                         format: date-time
                         example: '2025-11-14T02:47:35.550732'
           description: ''
-    get:
-      operationId: int_v1_specific_setting_retrieve
-      description: Endpoint to retrieve a specific application setting by its slug.
-      summary: Retrieve Specific Application Setting
+    patch:
+      operationId: int_v1_specific_setting_update
+      description: Endpoint to update a specific application setting by its slug.
+      summary: Update Specific Application Setting
       parameters:
       - in: path
         name: slug
@@ -610,6 +599,17 @@ paths:
         required: true
       tags:
       - Internal / Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchUpdateSettingRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchUpdateSettingRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchUpdateSettingRequestRequest'
       security:
       - BearerAuth: []
       - {}
@@ -618,7 +618,7 @@ paths:
           content:
             application/json:
               schema:
-                description: Setting retrieved successfully
+                description: Setting updated successfully
                 type: object
                 properties:
                   success:
@@ -880,6 +880,69 @@ paths:
                         example: '2025-11-13T00:16:58.443714'
           description: ''
   /int/v1/social-media/{id}:
+    get:
+      operationId: int_v1_social_media_retrieve
+      description: Endpoint for retrieving a specific social media setting by its
+        primary key
+      summary: Retrieve Specific Social Media
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Social Media
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Social media data retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Social media data retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      platform:
+                        type: string
+                        example: Instagram
+                      icon:
+                        type: string
+                        example: https://instagram/favicon.ico
+                      url:
+                        type: string
+                        example: https://instagram.com
+                      order_no:
+                        type: integer
+                        example: 0
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-13T00:13:57.304284+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T01:32:04.715422'
+          description: ''
     patch:
       operationId: int_v1_social_media_update
       description: Endpoint for updating an existing social media setting
@@ -923,69 +986,6 @@ paths:
                   message:
                     type: string
                     example: Social media data updated successfully
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 1
-                      platform:
-                        type: string
-                        example: Instagram
-                      icon:
-                        type: string
-                        example: https://instagram/favicon.ico
-                      url:
-                        type: string
-                        example: https://instagram.com
-                      order_no:
-                        type: integer
-                        example: 0
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-13T00:13:57.304284+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T01:32:04.715422'
-          description: ''
-    get:
-      operationId: int_v1_social_media_retrieve
-      description: Endpoint for retrieving a specific social media setting by its
-        primary key
-      summary: Retrieve Specific Social Media
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - Internal / Social Media
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Social media data retrieved successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Social media data retrieved successfully
                   data:
                     type: object
                     properties:
@@ -1218,6 +1218,90 @@ paths:
                         example: '2025-11-16T03:08:02.321171'
           description: ''
   /int/v1/menus/{id}:
+    get:
+      operationId: int_v1_specific_menu_get
+      description: Endpoint to retrieve a specific application menu by its ID.
+      summary: Get Specific Application Menu
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Menu
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Menu updated successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Menu updated successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 4
+                      items:
+                        type: array
+                        items: {}
+                        example: []
+                      name:
+                        type: string
+                        example: About
+                      position:
+                        type: string
+                        example: header
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-16T03:06:17.942393+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-16T03:10:14.853766'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Menu not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Menu with id '44' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-16T03:10:46.083547'
+          description: ''
     patch:
       operationId: int_v1_specific_menu_update
       description: Endpoint to update a specific application menu by its ID.
@@ -1330,90 +1414,6 @@ paths:
                         type: string
                         format: date-time
                         example: '2025-11-16T03:15:29.496915'
-          description: ''
-    get:
-      operationId: int_v1_specific_menu_get
-      description: Endpoint to retrieve a specific application menu by its ID.
-      summary: Get Specific Application Menu
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - Internal / Menu
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Menu updated successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Menu updated successfully
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 4
-                      items:
-                        type: array
-                        items: {}
-                        example: []
-                      name:
-                        type: string
-                        example: About
-                      position:
-                        type: string
-                        example: header
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-16T03:06:17.942393+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-16T03:10:14.853766'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                description: Menu not found
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  status_code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: Menu with id '44' does not exist.
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-16T03:10:46.083547'
           description: ''
     delete:
       operationId: int_v1_specific_menu_delete
@@ -1703,6 +1703,100 @@ paths:
                         example: '2025-11-22T23:23:17.220288'
           description: ''
   /int/v1/menu-items/{id}:
+    get:
+      operationId: int_v1_get_specific_menu_item
+      description: Retrieve a specific menu item by its ID.
+      summary: Get Specific Menu Item
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Menu Item
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Menu item retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Menu item retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 2
+                      menu:
+                        type: integer
+                        example: 5
+                      parent:
+                        type:
+                        - integer
+                        - 'null'
+                        example: null
+                      lang:
+                        type: string
+                        example: en
+                      label:
+                        type: string
+                        example: first menu item
+                      link:
+                        type: string
+                        example: linkasas
+                      order_no:
+                        type: integer
+                        example: 0
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-22T23:19:06.970907+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-22T23:34:26.621686'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Menu item not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: MenuItem with id '112' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-22T23:35:01.660931'
+          description: ''
     patch:
       operationId: int_v1_update_specific_menu_item
       description: Update a specific menu item by its ID.
@@ -1807,100 +1901,6 @@ paths:
                         type: string
                         format: date-time
                         example: '2025-11-22T23:52:37.374021'
-          description: ''
-    get:
-      operationId: int_v1_get_specific_menu_item
-      description: Retrieve a specific menu item by its ID.
-      summary: Get Specific Menu Item
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - Internal / Menu Item
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Menu item retrieved successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Menu item retrieved successfully
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 2
-                      menu:
-                        type: integer
-                        example: 5
-                      parent:
-                        type:
-                        - integer
-                        - 'null'
-                        example: null
-                      lang:
-                        type: string
-                        example: en
-                      label:
-                        type: string
-                        example: first menu item
-                      link:
-                        type: string
-                        example: linkasas
-                      order_no:
-                        type: integer
-                        example: 0
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-22T23:19:06.970907+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-22T23:34:26.621686'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                description: Menu item not found
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  status_code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: MenuItem with id '112' does not exist.
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-22T23:35:01.660931'
           description: ''
     delete:
       operationId: int_v1_delete_specific_menu_item
@@ -2684,6 +2684,742 @@ paths:
                         format: date-time
                         example: '2025-11-27T20:24:37.935078'
           description: ''
+  /int/v1/pages:
+    get:
+      operationId: int_v1_page_get_pages
+      description: Retrieve all pages with pagination support.
+      summary: Retrieve all pages
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: 'Page number (default: 1)'
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          default: 20
+        description: 'Number of items per page (default: 20, max: 100)'
+      tags:
+      - Internal / Page
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Pages retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Pages retrieved successfully.
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        slug:
+                          type: string
+                          example: about-us
+                        title:
+                          type: string
+                          example: About Us
+                        content:
+                          type: string
+                          example: <p>Welcome to our company...</p>
+                        meta_title:
+                          type: string
+                          example: About Us - Company Name
+                        meta_description:
+                          type: string
+                          example: Learn more about our company history and values.
+                        meta_keywords:
+                          type: string
+                          example: about, company, history, values
+                        template:
+                          type: string
+                          example: default
+                        is_active:
+                          type: boolean
+                          example: true
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-28T10:30:00.000000+07:00'
+                        updated_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-28T10:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+                      pagination:
+                        type: object
+                        properties:
+                          current_page:
+                            type: integer
+                            example: 1
+                          per_page:
+                            type: integer
+                            example: 20
+                          total_pages:
+                            type: integer
+                            example: 1
+                          total_items:
+                            type: integer
+                            example: 5
+                          has_next:
+                            type: boolean
+                            example: false
+                          has_previous:
+                            type: boolean
+                            example: false
+                          next_page:
+                            type: integer
+                            nullable: true
+                            example: null
+                          previous_page:
+                            type: integer
+                            nullable: true
+                            example: null
+          description: ''
+    post:
+      operationId: int_v1_page_create_page
+      description: Create a new page with content and SEO metadata.
+      summary: Create Page
+      tags:
+      - Internal / Page
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreatePageRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostCreatePageRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreatePageRequestRequest'
+        required: true
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Page created successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Page created successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: about-us
+                      title:
+                        type: string
+                        example: About Us
+                      content:
+                        type: string
+                        example: <p>Welcome to our company...</p>
+                      meta_title:
+                        type: string
+                        example: About Us - Company Name
+                      meta_description:
+                        type: string
+                        example: Learn more about our company history and values.
+                      meta_keywords:
+                        type: string
+                        example: about, company, history, values
+                      template:
+                        type: string
+                        example: default
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Bad Request - Validation Error
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: A page with slug 'about-us' already exists.
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          example: slug
+                        message:
+                          type: string
+                          example: A page with slug 'about-us' already exists.
+                        code:
+                          type: string
+                          example: unique
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+          description: ''
+  /int/v1/pages/{id}:
+    get:
+      operationId: int_v1_page_get_specific_page
+      description: Retrieve a specific page by its ID.
+      summary: Retrieve a specific page by ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Page
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Page retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Page retrieved successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: about-us
+                      title:
+                        type: string
+                        example: About Us
+                      content:
+                        type: string
+                        example: <p>Welcome to our company...</p>
+                      meta_title:
+                        type: string
+                        example: About Us - Company Name
+                      meta_description:
+                        type: string
+                        example: Learn more about our company history and values.
+                      meta_keywords:
+                        type: string
+                        example: about, company, history, values
+                      template:
+                        type: string
+                        example: default
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Page not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Page with id '99' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+          description: ''
+    delete:
+      operationId: int_v1_page_delete_specific_page
+      description: Delete a specific page by its ID.
+      summary: Delete a specific page by ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Page
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Page deleted successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Page deleted successfully.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:00:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Page not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Page with id '99' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:00:00.000000'
+          description: ''
+    put:
+      operationId: int_v1_page_update_specific_page
+      description: Update a specific page by its ID with new data.
+      summary: Update a specific page by ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Page
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutUpdatePageRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PutUpdatePageRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PutUpdatePageRequestRequest'
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Page updated successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Page updated successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: about-us
+                      title:
+                        type: string
+                        example: About Us - Updated
+                      content:
+                        type: string
+                        example: <p>Updated content...</p>
+                      meta_title:
+                        type: string
+                        example: About Us - Company Name
+                      meta_description:
+                        type: string
+                        example: Updated description.
+                      meta_keywords:
+                        type: string
+                        example: about, company, updated
+                      template:
+                        type: string
+                        example: default
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T11:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T11:30:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Bad Request - Page not found or validation error
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Page with id '99' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T11:30:00.000000'
+          description: ''
+  /int/v1/pages/{id}/toggle:
+    patch:
+      operationId: int_v1_page_toggle_page_status
+      description: Toggle the active status of a specific page.
+      summary: Toggle page active status
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Page
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchTogglePageStatusRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchTogglePageStatusRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchTogglePageStatusRequestRequest'
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Page status updated successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Page status updated successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: about-us
+                      title:
+                        type: string
+                        example: About Us
+                      content:
+                        type: string
+                        example: <p>Welcome to our company...</p>
+                      meta_title:
+                        type: string
+                        example: About Us - Company Name
+                      meta_description:
+                        type: string
+                        example: Learn more about our company history and values.
+                      meta_keywords:
+                        type: string
+                        example: about, company, history, values
+                      template:
+                        type: string
+                        example: default
+                      is_active:
+                        type: boolean
+                        example: false
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:30:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Page not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Page with id '99' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:30:00.000000'
+          description: ''
+  /int/v1/pages/slug/{slug}:
+    get:
+      operationId: int_v1_page_get_page_by_slug
+      description: Retrieve a page by its slug identifier.
+      summary: Retrieve a page by slug
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Internal / Page
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Page retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Page retrieved successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: about-us
+                      title:
+                        type: string
+                        example: About Us
+                      content:
+                        type: string
+                        example: <p>Welcome to our company...</p>
+                      meta_title:
+                        type: string
+                        example: About Us - Company Name
+                      meta_description:
+                        type: string
+                        example: Learn more about our company history and values.
+                      meta_keywords:
+                        type: string
+                        example: about, company, history, values
+                      template:
+                        type: string
+                        example: default
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Page not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Page with slug 'non-existent' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+          description: ''
   /pub/v1/subscribers:
     post:
       operationId: pub_v1_create_subscriber
@@ -2799,6 +3535,13 @@ components:
           nullable: true
           minLength: 1
           description: Email address of the user
+    PatchedPatchTogglePageStatusRequestRequest:
+      type: object
+      description: Serializer for toggling page active status.
+      properties:
+        is_active:
+          type: boolean
+          description: Whether the page should be active or inactive.
     PatchedPatchUpdateMenuItemRequestRequest:
       type: object
       description: Serializer for updating an existing MenuItem.
@@ -2998,6 +3741,43 @@ components:
       required:
       - name
       - position
+    PostCreatePageRequestRequest:
+      type: object
+      description: Serializer for creating a new page.
+      properties:
+        slug:
+          type: string
+          description: URL slug for the page. If empty, will be generated from title.
+          maxLength: 255
+        title:
+          type: string
+          minLength: 1
+          description: Title of the page.
+          maxLength: 255
+        content:
+          type: string
+          minLength: 1
+          description: HTML content of the page.
+        meta_title:
+          type: string
+          description: Meta title for SEO purposes.
+          maxLength: 255
+        meta_description:
+          type: string
+          description: Meta description for SEO purposes.
+        meta_keywords:
+          type: string
+          description: Meta keywords for SEO purposes.
+        template:
+          type: string
+          description: Template name to use for rendering this page.
+          maxLength: 100
+        is_active:
+          type: boolean
+          description: Whether the page is active and visible to public.
+      required:
+      - content
+      - title
     PostCreateSettingRequestRequest:
       type: object
       description: Serializer for creating or updating application settings
@@ -3116,6 +3896,40 @@ components:
       required:
       - current_password
       - new_password
+    PutUpdatePageRequestRequest:
+      type: object
+      description: Serializer for updating an existing page.
+      properties:
+        slug:
+          type: string
+          description: URL slug for the page. If empty, will be generated from title.
+          maxLength: 255
+        title:
+          type: string
+          minLength: 1
+          description: Title of the page.
+          maxLength: 255
+        content:
+          type: string
+          minLength: 1
+          description: HTML content of the page.
+        meta_title:
+          type: string
+          description: Meta title for SEO purposes.
+          maxLength: 255
+        meta_description:
+          type: string
+          description: Meta description for SEO purposes.
+        meta_keywords:
+          type: string
+          description: Meta keywords for SEO purposes.
+        template:
+          type: string
+          description: Template name to use for rendering this page.
+          maxLength: 100
+        is_active:
+          type: boolean
+          description: Whether the page is active and visible to public.
   securitySchemes:
     BearerAuth:
       type: http
@@ -3139,5 +3953,7 @@ tags:
   description: Application banner management
 - name: Internal / Subscriber
   description: Application subscriber management
+- name: Internal / Page
+  description: Application page management
 - name: Public / Subscriber
   description: Application subscriber management

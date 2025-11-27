@@ -202,6 +202,10 @@ SPECTACULAR_SETTINGS = {
             "name": "Internal / Subscriber",
             "description": "Application subscriber management",
         },
+        {
+            "name": "Internal / Page",
+            "description": "Application page management",
+        },
         # Public API Tags
         {
             "name": "Public / Subscriber",
@@ -247,7 +251,9 @@ RECAPTCHA_V2_SECRET_KEY = os.environ.get("RECAPTCHA_V2_SECRET_KEY", "")
 RECAPTCHA_V3_SECRET_KEY = os.environ.get("RECAPTCHA_V3_SECRET_KEY", "")
 
 # Default version and settings
-RECAPTCHA_DEFAULT_VERSION = os.environ.get("RECAPTCHA_DEFAULT_VERSION", "v2")  # v2 or v3
+RECAPTCHA_DEFAULT_VERSION = os.environ.get(
+    "RECAPTCHA_DEFAULT_VERSION", "v2"
+)  # v2 or v3
 RECAPTCHA_TIMEOUT = int(
     os.environ.get("RECAPTCHA_TIMEOUT", "10")
 )  # Request timeout in seconds

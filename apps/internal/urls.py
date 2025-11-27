@@ -9,4 +9,5 @@ urlpatterns = [
     path("/v1/menu-items", include("apps.internal.menu_item.urls")),
     path("/v1/banners", include("apps.internal.banner.urls")),
     path("/v1/subscribers", include("apps.internal.subscriber.urls")),
+    path("/v1/pages", include("apps.internal.page.urls")),
 ]

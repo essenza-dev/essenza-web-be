@@ -5,6 +5,7 @@ from .menu import MenuAPI
 from .menu_item import MenuItemAPI
 from .banner import BannerAPI
 from .subscriber import SubscriberAPI
+from .page import PageAPI
 
 __all__ = [
     "AuthenticationApi",
@@ -14,4 +15,5 @@ __all__ = [
     "MenuItemAPI",
     "BannerAPI",
     "SubscriberAPI",
+    "PageAPI",
 ]
