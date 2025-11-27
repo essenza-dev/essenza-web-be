@@ -3,7 +3,7 @@ from typing import Tuple
 from django.db.models.manager import BaseManager
 from core.service import BaseService
 from core.models import Banner
-from django.core.paginator import Page, Paginator
+from django.core.paginator import Page
 
 from . import dto
 
@@ -27,28 +27,8 @@ class BannerService(BaseService):
 
     def get_paginated_banners(self, str_page_number: str, str_page_size: str) -> Page:
         """Retrieve paginated banners."""
-        try:
-            page_number = int(str_page_number)
-            page_size = int(str_page_size)
-        except ValueError:
-            page_number = 1
-            page_size = 20
-
-        page_number = max(page_number, 1)
-        page_size = max(page_size, 1)
-
-        page_size = min(page_size, 100)
-
-        socmeds = Banner.objects.order_by("order_no", "-created_at")
-
-        paginator = Paginator(socmeds, page_size)
-
-        try:
-            page = paginator.get_page(page_number)
-        except Exception:
-            page = paginator.get_page(1)
-
-        return page
+        queryset = Banner.objects.order_by("order_no", "-created_at")
+        return self.get_paginated_data(queryset, str_page_number, str_page_size)
 
     def get_specific_banner(self, pk: int) -> Tuple[Banner, Exception | None]:
         """Retrieve a specific banner by its ID."""

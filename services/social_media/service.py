@@ -1,5 +1,5 @@
 from typing import Tuple
-from django.core.paginator import Page, Paginator
+from django.core.paginator import Page
 
 from core.service import BaseService
 from core.models import SocialMedia
@@ -18,28 +18,8 @@ class SocialMediaService(BaseService):
         """
         Retrieve a paginated list of social media entries ordered by order_no and created_at
         """
-        try:
-            page_number = int(str_page_number)
-            page_size = int(str_page_size)
-        except ValueError:
-            page_number = 1
-            page_size = 20
-
-        page_number = max(page_number, 1)
-        page_size = max(page_size, 1)
-
-        page_size = min(page_size, 100)
-
-        socmeds = SocialMedia.objects.order_by("order_no", "-created_at")
-
-        paginator = Paginator(socmeds, page_size)
-
-        try:
-            page = paginator.get_page(page_number)
-        except Exception:
-            page = paginator.get_page(1)
-
-        return page
+        queryset = SocialMedia.objects.order_by("order_no", "-created_at")
+        return self.get_paginated_data(queryset, str_page_number, str_page_size)
 
     def create_social_media(self, **data) -> SocialMedia:
         """
