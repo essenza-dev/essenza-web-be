@@ -240,3 +240,17 @@ JWT_REFRESH_SIGNATURE = os.environ.get(
 JWT_FERNET_KEY = os.environ.get(
     "JWT_FERNET_KEY", "soJLqlAzc2ESzvr3NTbeZ8TqT7VgmmW5g-KUYiKyihE="
 )
+
+# Google reCAPTCHA Configuration
+# v2 and v3 require different secret keys from Google Console
+RECAPTCHA_V2_SECRET_KEY = os.environ.get("RECAPTCHA_V2_SECRET_KEY", "")
+RECAPTCHA_V3_SECRET_KEY = os.environ.get("RECAPTCHA_V3_SECRET_KEY", "")
+
+# Default version and settings
+RECAPTCHA_DEFAULT_VERSION = os.environ.get("RECAPTCHA_DEFAULT_VERSION", "v2")  # v2 or v3
+RECAPTCHA_TIMEOUT = int(
+    os.environ.get("RECAPTCHA_TIMEOUT", "10")
+)  # Request timeout in seconds
+RECAPTCHA_SCORE_THRESHOLD = float(
+    os.environ.get("RECAPTCHA_SCORE_THRESHOLD", "0.5")
+)  # v3 only (0.0-1.0)

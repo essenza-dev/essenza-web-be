@@ -15,47 +15,45 @@ from .base import (
     TEMPLATES,
     WSGI_APPLICATION,
     DATABASES,
-
     # Internationalization
     LANGUAGE_CODE,
     TIME_ZONE,
     USE_I18N,
     USE_L10N,
     USE_TZ,
-
     # Static files
     STATIC_URL,
     STATIC_ROOT,
-
     # Django configuration
     DEFAULT_AUTO_FIELD,
     PASSWORD_HASHERS,
     SILENCED_SYSTEM_CHECKS,
-
     # DRF settings
     REST_FRAMEWORK,
     SPECTACULAR_SETTINGS,
-
     # Database and migrations
     MIGRATION_MODULES,
     DATABASE_ROUTERS,
-
     # File uploads
     FILE_UPLOAD_BASE_DIR,
     FILE_UPLOAD_MAX_MEMORY_SIZE,
     DATA_UPLOAD_MAX_MEMORY_SIZE,
-
     # Session configuration
     SESSION_COOKIE_AGE,
     SESSION_SAVE_EVERY_REQUEST,
     SESSION_EXPIRE_AT_BROWSER_CLOSE,
-
     # JWT settings
     JWT_SECRET,
     JWT_ALGORITHM,
     JWT_EXPIRY_SECONDS,
     JWT_REFRESH_SIGNATURE,
     JWT_FERNET_KEY,
+    # reCAPTCHA settings (base values, some overridden below)
+    RECAPTCHA_V2_SECRET_KEY,
+    RECAPTCHA_V3_SECRET_KEY,
+    RECAPTCHA_DEFAULT_VERSION,
+    RECAPTCHA_TIMEOUT,
+    RECAPTCHA_SCORE_THRESHOLD,
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -184,3 +182,14 @@ DATABASES["default"]["NAME"] = os.environ.get("DB_NAME", "essenza_db_dev")
 
 # Development JWT expiry (longer for convenience)
 JWT_EXPIRY_SECONDS = int(os.environ.get("JWT_EXPIRY_SECONDS", "86400"))  # 1 day
+
+# Development-specific reCAPTCHA settings
+# Override to allow empty secret keys in development for testing with default token
+RECAPTCHA_V2_SECRET_KEY = os.environ.get("RECAPTCHA_V2_SECRET_KEY", "") or ""
+RECAPTCHA_V3_SECRET_KEY = os.environ.get("RECAPTCHA_V3_SECRET_KEY", "") or ""
+
+# Force reCAPTCHA verification (set to True to test real CAPTCHA in dev)
+FORCE_RECAPTCHA_VERIFICATION = os.environ.get("FORCE_RECAPTCHA_VERIFICATION", "True").lower() == "true"
+
+# Ensure Django environment is set correctly
+DJANGO_ENV = "development"

@@ -6,6 +6,7 @@ using Django REST Framework serializers with consistent response format
 using utils.response.
 """
 
+import contextlib
 from functools import wraps
 from typing import Type, Callable, Any, Optional, List, Dict
 from enum import Enum
@@ -85,6 +86,42 @@ def _get_data_from_source(
         raise ValueError(f"Invalid data_source: {data_source}")
 
 
+def _clean_captcha_fields(validated_data: Any, serializer: Any) -> Dict[str, Any]:
+    """
+    Remove CAPTCHA fields from validated data if serializer extends UseCaptchaSerializer.
+
+    Args:
+        validated_data: The validated data (can be dict, QueryDict, or other)
+        serializer: The serializer instance
+
+    Returns:
+        Cleaned validated data without CAPTCHA fields
+    """
+    with contextlib.suppress(ImportError):
+        # Check if serializer is instance of or inherits from UseCaptchaSerializer
+        from utils.captcha.serializers import UseCaptchaSerializer
+
+        if isinstance(serializer, UseCaptchaSerializer):
+            # Convert to dict and create a copy to remove CAPTCHA fields
+            if hasattr(validated_data, "dict"):
+                # Handle QueryDict
+                cleaned_data = validated_data.dict()
+            else:
+                # Handle regular dict or other dict-like objects
+                cleaned_data = dict(validated_data) if validated_data else {}
+
+            # Remove CAPTCHA fields
+            cleaned_data.pop("captcha_token", None)
+            cleaned_data.pop("captcha_version", None)
+            return cleaned_data
+
+    # Return original data as dict if not a CAPTCHA serializer
+    if hasattr(validated_data, "dict"):
+        return validated_data.dict()
+    else:
+        return dict(validated_data) if validated_data else {}
+
+
 def validate_request(
     serializer_class: Type[serializers.Serializer],
     data_source: DataSource | str = DataSource.BODY,
@@ -126,8 +163,11 @@ def validate_request(
                     errors=serializer.errors, message="Data validation failed"
                 )
 
-            # Add validated_data to kwargs
-            kwargs["validated_data"] = serializer.validated_data
+            # Clean validated data for CAPTCHA serializers
+            cleaned_data = _clean_captcha_fields(serializer.validated_data, serializer)
+
+            # Add cleaned validated_data to kwargs
+            kwargs["validated_data"] = cleaned_data
 
             # Call original function with validated_data
             return view_func(*args, **kwargs)
@@ -224,8 +264,11 @@ def validate_request_with_context(
                     errors=serializer.errors, message="Data validation failed"
                 )
 
-            # Add validated_data to kwargs
-            kwargs["validated_data"] = serializer.validated_data
+            # Clean validated data for CAPTCHA serializers
+            cleaned_data = _clean_captcha_fields(serializer.validated_data, serializer)
+
+            # Add cleaned validated_data to kwargs
+            kwargs["validated_data"] = cleaned_data
 
             return view_func(*args, **kwargs)
 

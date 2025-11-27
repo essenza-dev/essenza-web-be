@@ -4,7 +4,6 @@ Production Django settings for config project.
 This module contains production-specific settings.
 """
 
-import logging.handlers
 import os
 from .base import (
     # Core Django settings
@@ -16,47 +15,45 @@ from .base import (
     TEMPLATES,
     WSGI_APPLICATION,
     DATABASES,
-
     # Internationalization
     LANGUAGE_CODE,
     TIME_ZONE,
     USE_I18N,
     USE_L10N,
     USE_TZ,
-
     # Static files
     STATIC_URL,
     STATIC_ROOT,
-
     # Django configuration
     DEFAULT_AUTO_FIELD,
     PASSWORD_HASHERS,
     SILENCED_SYSTEM_CHECKS,
-
     # DRF settings
     REST_FRAMEWORK,
     SPECTACULAR_SETTINGS,
-
     # Database and migrations
     MIGRATION_MODULES,
     DATABASE_ROUTERS,
-
     # File uploads
     FILE_UPLOAD_BASE_DIR,
     FILE_UPLOAD_MAX_MEMORY_SIZE,
     DATA_UPLOAD_MAX_MEMORY_SIZE,
-
     # Session configuration
     SESSION_COOKIE_AGE,
     SESSION_SAVE_EVERY_REQUEST,
     SESSION_EXPIRE_AT_BROWSER_CLOSE,
-
     # JWT settings
     JWT_SECRET,
     JWT_ALGORITHM,
     JWT_EXPIRY_SECONDS,
     JWT_REFRESH_SIGNATURE,
     JWT_FERNET_KEY,
+    # reCAPTCHA settings (base values, some overridden below)
+    RECAPTCHA_V2_SECRET_KEY,
+    RECAPTCHA_V3_SECRET_KEY,
+    RECAPTCHA_DEFAULT_VERSION,
+    RECAPTCHA_TIMEOUT,
+    RECAPTCHA_SCORE_THRESHOLD,
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -80,6 +77,19 @@ SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Production-specific reCAPTCHA settings
+# Both secret keys are required in production
+if not RECAPTCHA_V2_SECRET_KEY:
+    raise ValueError("RECAPTCHA_V2_SECRET_KEY is required in production")
+if not RECAPTCHA_V3_SECRET_KEY:
+    raise ValueError("RECAPTCHA_V3_SECRET_KEY is required in production")
+
+# Always enforce CAPTCHA verification in production
+FORCE_RECAPTCHA_VERIFICATION = True
+
+# Ensure Django environment is set correctly
+DJANGO_ENV = "production"
 
 # Additional security settings
 X_FRAME_OPTIONS = "DENY"
@@ -192,18 +202,20 @@ LOGGING = {
 }
 
 # Override database configuration for production
-DATABASES["default"].update({
-    "NAME": os.environ.get("DB_NAME", "essenza_db_prod"),
-    "OPTIONS": {
-        **DATABASES["default"]["OPTIONS"],
-        # "init_command": (
-        #     "SET sql_mode='STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO';"
-        #     "SET innodb_strict_mode=1;"
-        #     "SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;"
-        #     "SET SESSION time_zone = '+00:00';"
-        # ),
-    },
-})
+DATABASES["default"].update(
+    {
+        "NAME": os.environ.get("DB_NAME", "essenza_db_prod"),
+        "OPTIONS": {
+            **DATABASES["default"]["OPTIONS"],
+            # "init_command": (
+            #     "SET sql_mode='STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO';"
+            #     "SET innodb_strict_mode=1;"
+            #     "SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;"
+            #     "SET SESSION time_zone = '+00:00';"
+            # ),
+        },
+    }
+)
 
 # Production static files settings
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
@@ -239,5 +251,9 @@ if "debug_toolbar" in INSTALLED_APPS:
     INSTALLED_APPS.remove("debug_toolbar")
 
 # Remove debug middleware in production
-MIDDLEWARE = [middleware for middleware in MIDDLEWARE
-              if "debug_toolbar" not in middleware]
+MIDDLEWARE = [
+    middleware for middleware in MIDDLEWARE if "debug_toolbar" not in middleware
+]
+
+# Force reCAPTCHA verification
+FORCE_RECAPTCHA_VERIFICATION = True

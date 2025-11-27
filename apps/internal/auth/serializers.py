@@ -1,10 +1,9 @@
 from typing import Any
 from rest_framework import serializers
+from utils.captcha.serializers import UseCaptchaSerializer
 
-from core.enums.user_role import UserRole
 
-
-class PostAuthTokenRequest(serializers.Serializer):
+class PostAuthTokenRequest(UseCaptchaSerializer):
     """
     User login request schema.
     """
