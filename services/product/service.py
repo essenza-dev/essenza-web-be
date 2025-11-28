@@ -24,6 +24,36 @@ logger = logging.getLogger(__name__)
 class ProductService(BaseService):
     """Service class for managing product operations with comprehensive CRUD functionality."""
 
+    def validate_slug_uniqueness(
+        self, slug: str, exclude_id: Optional[int] = None
+    ) -> bool:
+        """
+        Validate if slug is unique.
+
+        Args:
+            slug: The slug to validate
+            exclude_id: Product ID to exclude from validation (for updates)
+
+        Returns:
+            True if slug is unique, False otherwise
+        """
+        queryset = Product.objects.filter(slug=slug)
+        if exclude_id:
+            queryset = queryset.exclude(id=exclude_id)
+        return not queryset.exists()
+
+    def validate_brochure_exists(self, brochure_id: int) -> bool:
+        """
+        Validate if brochure exists.
+
+        Args:
+            brochure_id: The brochure ID to validate
+
+        Returns:
+            True if brochure exists, False otherwise
+        """
+        return Brochure.objects.filter(id=brochure_id).exists()
+
     def create_product(
         self, data: dto.CreateProductDTO
     ) -> Tuple[Product, Optional[Exception]]:
@@ -37,6 +67,18 @@ class ProductService(BaseService):
             Tuple containing the created product and any error that occurred
         """
         try:
+            # Validate slug uniqueness
+            if data.slug and not self.validate_slug_uniqueness(data.slug):
+                return Product(), ValidationError(
+                    "Product with this slug already exists."
+                )
+
+            # Validate brochure exists if provided
+            if data.brochure_id and not self.validate_brochure_exists(data.brochure_id):
+                return Product(), ValidationError(
+                    f"Brochure with id {data.brochure_id} does not exist."
+                )
+
             product_data = data.to_dict()
 
             # Process main image upload
@@ -381,7 +423,7 @@ class ProductService(BaseService):
 
         except Exception as e:
             logger.error(f"Error saving product gallery image: {str(e)}", exc_info=True)
-            raise e
+            raise ValidationError(f"Failed to save gallery image: {str(e)}") from e
 
     def _delete_product_file(self, file_path: str) -> None:
         """
@@ -476,6 +518,17 @@ class ProductService(BaseService):
             Tuple containing the updated product and None
         """
         product = Product.objects.get(id=pk)
+
+        # Validate slug uniqueness if slug is being updated
+        if data.slug and not self.validate_slug_uniqueness(data.slug, exclude_id=pk):
+            raise ValidationError("Product with this slug already exists.")
+
+        # Validate brochure exists if provided
+        if data.brochure_id and not self.validate_brochure_exists(data.brochure_id):
+            raise ValidationError(
+                f"Brochure with id {data.brochure_id} does not exist."
+            )
+
         update_data = data.to_dict()
 
         # Handle main image update

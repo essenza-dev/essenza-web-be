@@ -184,8 +184,7 @@ class ProductViewSet(BaseViewSet):
         try:
             logger.info(f"Deleting product with ID: {pk}")
 
-            error = self._product_service.delete_specific_product(pk=pk)
-            if error:
+            if error := self._product_service.delete_specific_product(pk=pk):
                 logger.error(f"Error deleting product: {str(error)}")
                 return api_response(request).error(message=str(error))
 

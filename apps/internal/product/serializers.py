@@ -12,7 +12,6 @@ from core.enums import ProductType
 
 # Constants
 PRODUCT_ACTIVE_STATUS_HELP = "Product active status"
-PRODUCT_SLUG_EXISTS_ERROR = "Product with this slug already exists."
 
 
 class ProductModelSerializer(serializers.ModelSerializer):
@@ -101,20 +100,16 @@ class PostCreateProductRequest(serializers.Serializer):
     is_active = serializers.BooleanField(help_text=PRODUCT_ACTIVE_STATUS_HELP)
 
     def validate_slug(self, value: str) -> str:
-        """Validate slug uniqueness."""
-        if Product.objects.filter(slug=value).exists():
-            raise serializers.ValidationError(PRODUCT_SLUG_EXISTS_ERROR)
+        """Validate slug format and basic requirements."""
+        # Basic slug validation - actual uniqueness will be validated in service layer
+        if not value or not value.strip():
+            raise serializers.ValidationError("Slug cannot be empty.")
         return value
 
     def validate_brochure_id(self, value: int | None) -> int | None:
-        """Validate brochure exists if provided."""
-        if value is not None:
-            try:
-                Brochure.objects.get(id=value)
-            except Brochure.DoesNotExist as e:
-                raise serializers.ValidationError(
-                    f"Brochure with id {value} does not exist."
-                ) from e
+        """Validate brochure ID format - existence will be validated in service layer."""
+        if value is not None and value <= 0:
+            raise serializers.ValidationError("Brochure ID must be a positive integer.")
         return value
 
 
@@ -177,23 +172,15 @@ class PutUpdateProductRequest(serializers.Serializer):
     )
 
     def validate_slug(self, value: str) -> str:
-        """Validate slug uniqueness for update."""
-        if (instance := getattr(self, "instance", None)) and instance.slug != value:
-            if Product.objects.filter(slug=value).exists():
-                raise serializers.ValidationError(PRODUCT_SLUG_EXISTS_ERROR)
-        elif not instance and Product.objects.filter(slug=value).exists():
-            raise serializers.ValidationError(PRODUCT_SLUG_EXISTS_ERROR)
+        """Validate slug format and basic requirements - uniqueness will be validated in service layer."""
+        if not value or not value.strip():
+            raise serializers.ValidationError("Slug cannot be empty.")
         return value
 
     def validate_brochure_id(self, value: int | None) -> int | None:
-        """Validate brochure exists if provided."""
-        if value is not None:
-            try:
-                Brochure.objects.get(id=value)
-            except Brochure.DoesNotExist as e:
-                raise serializers.ValidationError(
-                    f"Brochure with id {value} does not exist."
-                ) from e
+        """Validate brochure ID format - existence will be validated in service layer."""
+        if value is not None and value <= 0:
+            raise serializers.ValidationError("Brochure ID must be a positive integer.")
         return value
 
 
