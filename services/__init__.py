@@ -9,6 +9,7 @@ from .subscriber.service import SubscriberService
 from .page.service import PageService
 from .product.service import ProductService
 from .brochure.service import BrochureService
+from .project.service import ProjectService
 
 __all__ = [
     "AuthService",
@@ -22,4 +23,5 @@ __all__ = [
     "PageService",
     "ProductService",
     "BrochureService",
+    "ProjectService",
 ]
