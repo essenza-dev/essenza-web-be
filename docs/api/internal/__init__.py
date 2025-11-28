@@ -7,6 +7,7 @@ from .banner import BannerAPI
 from .subscriber import SubscriberAPI
 from .page import PageAPI
 from .product import ProductAPI
+from .brochure import BrochureAPI
 
 __all__ = [
     "AuthenticationApi",
@@ -18,4 +19,5 @@ __all__ = [
     "SubscriberAPI",
     "PageAPI",
     "ProductAPI",
+    "BrochureAPI",
 ]

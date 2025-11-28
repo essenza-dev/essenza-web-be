@@ -11,4 +11,5 @@ urlpatterns = [
     path("/v1/subscribers", include("apps.internal.subscriber.urls")),
     path("/v1/pages", include("apps.internal.page.urls")),
     path("/v1/products", include("apps.internal.product.urls")),
+    path("/v1/brochures", include("apps.internal.brochure.urls")),
 ]

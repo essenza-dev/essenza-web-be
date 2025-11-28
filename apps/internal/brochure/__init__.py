@@ -1,0 +1,1 @@
+"""Brochure internal app module."""

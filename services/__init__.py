@@ -8,6 +8,7 @@ from .banner.service import BannerService
 from .subscriber.service import SubscriberService
 from .page.service import PageService
 from .product.service import ProductService
+from .brochure.service import BrochureService
 
 __all__ = [
     "AuthService",
@@ -20,4 +21,5 @@ __all__ = [
     "SubscriberService",
     "PageService",
     "ProductService",
+    "BrochureService",
 ]
