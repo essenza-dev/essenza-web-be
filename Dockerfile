@@ -73,10 +73,12 @@ RUN python manage.py collectstatic --noinput
 # Create a non-root user
 RUN groupadd -r django && useradd -r -g django django
 
-# Ensure log directory exists and copy gunicorn config
+# Ensure log directory exists and copy configs
 RUN mkdir -p /app/logs
 COPY gunicorn.conf.py /app/gunicorn.conf.py
-RUN chown -R django:django /app /app/logs /app/gunicorn.conf.py
+COPY script/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+RUN chown -R django:django /app /app/logs /app/gunicorn.conf.py /app/entrypoint.sh
 
 # Expose port
 EXPOSE 8000
@@ -88,4 +90,6 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Switch to non-root user
 USER django
 
+# Set entrypoint
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["gunicorn", "--config", "/app/gunicorn.conf.py", "config.wsgi:application", "--bind", "0.0.0.0:8000"]

@@ -115,11 +115,83 @@ run_analysis() {
         -Dsonar.projectBaseDir=. \
         -Dsonar.verbose=false; then
 
-        print_success "SonarQube analysis completed successfully!"
+        print_success "SonarQube scanner executed successfully!"
         print_status "View results at: $SONAR_HOST_URL/dashboard?id=essenza-web-backend"
+
+        # Now check actual issues from SonarQube
+        check_sonar_issues
     else
         print_error "SonarQube analysis failed!"
         exit 1
+    fi
+}
+
+# Check SonarQube issues via API
+check_sonar_issues() {
+    print_status "Checking for code quality issues..."
+
+    # Get project issues from SonarQube API
+    local api_url="${SONAR_HOST_URL}/api/issues/search?componentKeys=essenza-web-backend&statuses=OPEN"
+
+    if command -v curl &> /dev/null; then
+        # Use curl to get issues
+        local response
+        if [ -n "$SONAR_TOKEN" ]; then
+            response=$(curl -s -u "$SONAR_TOKEN:" "$api_url" 2>/dev/null)
+        else
+            response=$(curl -s "$api_url" 2>/dev/null)
+        fi
+
+        # Parse JSON response to count issues
+        if command -v python3 &> /dev/null; then
+            local issue_count
+            issue_count=$(echo "$response" | python3 -c "
+import json, sys
+try:
+    data = json.load(sys.stdin)
+    issues = data.get('issues', [])
+    total = data.get('total', len(issues))
+
+    # Count issues by severity
+    blocker = sum(1 for i in issues if i.get('severity') == 'BLOCKER')
+    critical = sum(1 for i in issues if i.get('severity') == 'CRITICAL')
+    major = sum(1 for i in issues if i.get('severity') == 'MAJOR')
+    minor = sum(1 for i in issues if i.get('severity') == 'MINOR')
+    info = sum(1 for i in issues if i.get('severity') == 'INFO')
+
+    print(f'{total}|{blocker}|{critical}|{major}|{minor}|{info}')
+except:
+    print('0|0|0|0|0|0')
+" 2>/dev/null)
+
+            IFS='|' read -r total blocker critical major minor info <<< "$issue_count"
+
+            # Report findings
+            if [ "$total" -gt 0 ]; then
+                print_warning "Found $total code quality issue(s):"
+                [ "$blocker" -gt 0 ] && print_error "  🚫 Blocker: $blocker"
+                [ "$critical" -gt 0 ] && print_error "  🔴 Critical: $critical"
+                [ "$major" -gt 0 ] && print_warning "  🟡 Major: $major"
+                [ "$minor" -gt 0 ] && print_status "  🔵 Minor: $minor"
+                [ "$info" -gt 0 ] && print_status "  ℹ️  Info: $info"
+
+                echo ""
+                print_warning "❌ Code quality issues detected! Please review and fix them."
+                print_status "Dashboard: $SONAR_HOST_URL/dashboard?id=essenza-web-backend"
+                return 1
+            else
+                print_success "✅ No code quality issues found!"
+                return 0
+            fi
+        else
+            print_warning "Python3 not available - cannot parse issue details"
+            print_status "Please check dashboard manually: $SONAR_HOST_URL/dashboard?id=essenza-web-backend"
+            return 0
+        fi
+    else
+        print_warning "curl not available - cannot check issues automatically"
+        print_status "Please check dashboard manually: $SONAR_HOST_URL/dashboard?id=essenza-web-backend"
+        return 0
     fi
 }
 
@@ -148,10 +220,21 @@ main() {
     check_environment
     clean_analysis
     security_check
+
+    # Run analysis and capture result
     run_analysis
+    local analysis_result=$?
+
     show_summary
 
-    print_success "All done! 🎉"
+    # Exit with appropriate status based on issues found
+    if [ $analysis_result -eq 0 ]; then
+        print_success "✅ Analysis completed - No issues found! 🎉"
+        exit 0
+    else
+        print_error "❌ Analysis completed - Issues found! Please review and fix them."
+        exit 1
+    fi
 }
 
 # Parse command line arguments
