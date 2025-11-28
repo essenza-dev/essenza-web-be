@@ -8,6 +8,7 @@ from .subscriber import SubscriberAPI
 from .page import PageAPI
 from .product import ProductAPI
 from .brochure import BrochureAPI
+from .project import ProjectAPI
 
 __all__ = [
     "AuthenticationApi",
@@ -20,4 +21,5 @@ __all__ = [
     "PageAPI",
     "ProductAPI",
     "BrochureAPI",
+    "ProjectAPI",
 ]

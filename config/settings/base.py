@@ -214,6 +214,10 @@ SPECTACULAR_SETTINGS = {
             "name": "Internal / Brochure",
             "description": "Application brochure management",
         },
+        {
+            "name": "Internal / Project",
+            "description": "Application project management",
+        },
         # Public API Tags
         {
             "name": "Public / Subscriber",
