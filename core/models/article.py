@@ -1,13 +1,15 @@
 from django.db import models
-from core.models._base import TimeStampedModel
+from core.models._base import TimeStampedModel, FileUploadModel, upload_to
 
 
-class Article(TimeStampedModel):
+class Article(TimeStampedModel, FileUploadModel):
     id = models.AutoField(primary_key=True, editable=False)
     title: models.CharField = models.CharField(max_length=255)
     slug: models.CharField = models.CharField(max_length=255, unique=True)
     content: models.TextField = models.TextField()
-    thumbnail: models.CharField = models.CharField(max_length=255, blank=True)
+    thumbnail: models.ImageField = models.ImageField(
+        upload_to=upload_to("articles/thumbnails"), null=True, blank=True
+    )
     author: models.CharField = models.CharField(max_length=100, blank=True)
     tags: models.CharField = models.CharField(max_length=255, blank=True)
     meta_title: models.CharField = models.CharField(max_length=255, blank=True)

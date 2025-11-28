@@ -145,23 +145,12 @@ paths:
                         example: '2025-11-05T17:39:56.395438'
           description: ''
   /int/v1/auth/me:
-    patch:
-      operationId: int_v1_auth_profile_update
-      description: Endpoint to update the profile of the authenticated user
-      summary: Update Authenticated User Profile
+    get:
+      operationId: int_v1_auth_profile
+      description: Endpoint to retrieve the profile of the authenticated user
+      summary: Get Authenticated User Profile
       tags:
       - Internal / Authentication
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
       security:
       - BearerAuth: []
       - {}
@@ -170,7 +159,7 @@ paths:
           content:
             application/json:
               schema:
-                description: User profile updated successfully
+                description: User profile retrieved successfully
                 type: object
                 properties:
                   success:
@@ -181,7 +170,7 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: User profile updated successfully
+                    example: User profile retrieved successfully
                   data:
                     type: object
                     properties:
@@ -229,12 +218,23 @@ paths:
                         format: date-time
                         example: '2025-11-07T23:20:19.170921'
           description: ''
-    get:
-      operationId: int_v1_auth_profile
-      description: Endpoint to retrieve the profile of the authenticated user
-      summary: Get Authenticated User Profile
+    patch:
+      operationId: int_v1_auth_profile_update
+      description: Endpoint to update the profile of the authenticated user
+      summary: Update Authenticated User Profile
       tags:
       - Internal / Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchAuthUserProfileRequestRequest'
       security:
       - BearerAuth: []
       - {}
@@ -243,7 +243,7 @@ paths:
           content:
             application/json:
               schema:
-                description: User profile retrieved successfully
+                description: User profile updated successfully
                 type: object
                 properties:
                   success:
@@ -254,7 +254,7 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: User profile retrieved successfully
+                    example: User profile updated successfully
                   data:
                     type: object
                     properties:
@@ -359,81 +359,6 @@ paths:
                         example: '2025-11-05T17:39:56.395438'
           description: ''
   /int/v1/settings:
-    post:
-      operationId: int_v1_setting_create
-      description: Endpoint to create or update application settings.
-      summary: Create new Application Settings
-      tags:
-      - Internal / Settings
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PostCreateSettingRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PostCreateSettingRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PostCreateSettingRequestRequest'
-        required: true
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                description: Setting created successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 201
-                  message:
-                    type: string
-                    example: Setting created successfully
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 3
-                      slug:
-                        type: string
-                        example: site-logo
-                      label:
-                        type: string
-                        example: Site Logo
-                      value:
-                        type: string
-                        example: https://mysite.com/assets/logo.png
-                      description:
-                        type: string
-                        example: ''
-                      is_active:
-                        type: boolean
-                        example: true
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T02:40:02.893665+07:00'
-                      updated_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T02:40:02.893714+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T02:40:02.902052'
-          description: ''
     get:
       operationId: int_v1_complete_settings_retrieve
       description: Endpoint to retrieve application settings.
@@ -516,7 +441,152 @@ paths:
                         format: date-time
                         example: '2025-11-14T02:43:57.268135'
           description: ''
+    post:
+      operationId: int_v1_setting_create
+      description: Endpoint to create or update application settings.
+      summary: Create new Application Settings
+      tags:
+      - Internal / Settings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreateSettingRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostCreateSettingRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreateSettingRequestRequest'
+        required: true
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                description: Setting created successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: Setting created successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 3
+                      slug:
+                        type: string
+                        example: site-logo
+                      label:
+                        type: string
+                        example: Site Logo
+                      value:
+                        type: string
+                        example: https://mysite.com/assets/logo.png
+                      description:
+                        type: string
+                        example: ''
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T02:40:02.893665+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T02:40:02.893714+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T02:40:02.902052'
+          description: ''
   /int/v1/settings/{slug}:
+    get:
+      operationId: int_v1_specific_setting_retrieve
+      description: Endpoint to retrieve a specific application setting by its slug.
+      summary: Retrieve Specific Application Setting
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Internal / Settings
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Setting retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Setting retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 3
+                      slug:
+                        type: string
+                        example: site-logo
+                      label:
+                        type: string
+                        example: Site Logo
+                      value:
+                        type: string
+                        format: uri
+                        example: https://mysite.com/assets/logo.png
+                      description:
+                        type: string
+                        example: ''
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T02:40:02.893665+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T02:40:02.893714+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T02:47:35.550732'
+          description: ''
     patch:
       operationId: int_v1_specific_setting_update
       description: Endpoint to update a specific application setting by its slug.
@@ -638,145 +708,7 @@ paths:
                         format: date-time
                         example: '2025-11-14T02:47:35.550732'
           description: ''
-    get:
-      operationId: int_v1_specific_setting_retrieve
-      description: Endpoint to retrieve a specific application setting by its slug.
-      summary: Retrieve Specific Application Setting
-      parameters:
-      - in: path
-        name: slug
-        schema:
-          type: string
-        required: true
-      tags:
-      - Internal / Settings
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Setting retrieved successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Setting retrieved successfully
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 3
-                      slug:
-                        type: string
-                        example: site-logo
-                      label:
-                        type: string
-                        example: Site Logo
-                      value:
-                        type: string
-                        format: uri
-                        example: https://mysite.com/assets/logo.png
-                      description:
-                        type: string
-                        example: ''
-                      is_active:
-                        type: boolean
-                        example: true
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T02:40:02.893665+07:00'
-                      updated_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T02:40:02.893714+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-14T02:47:35.550732'
-          description: ''
   /int/v1/social-media:
-    post:
-      operationId: int_v1_social_media_create
-      description: Endpoint for creating a new social media setting
-      summary: Create Social Media
-      tags:
-      - Internal / Social Media
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PostCreateSocialMediaRequestRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PostCreateSocialMediaRequestRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PostCreateSocialMediaRequestRequest'
-        required: true
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                description: Social media data created successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 201
-                  message:
-                    type: string
-                    example: Social media data created successfully
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 3
-                      platform:
-                        type: string
-                        example: TikTok
-                      icon:
-                        type: string
-                        example: ''
-                      url:
-                        type: string
-                        example: https://tiktok.com
-                      order_no:
-                        type: integer
-                        example: 2
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-13T00:16:58.437634+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-13T00:16:58.443714'
-          description: ''
     get:
       operationId: int_v1_social_media_list
       description: Endpoint for retrieving social media settings with pagination support.
@@ -879,7 +811,138 @@ paths:
                             example: null
                             nullable: true
           description: ''
+    post:
+      operationId: int_v1_social_media_create
+      description: Endpoint for creating a new social media setting
+      summary: Create Social Media
+      tags:
+      - Internal / Social Media
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreateSocialMediaRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PostCreateSocialMediaRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreateSocialMediaRequestRequest'
+        required: true
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                description: Social media data created successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: Social media data created successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 3
+                      platform:
+                        type: string
+                        example: TikTok
+                      icon:
+                        type: string
+                        example: ''
+                      url:
+                        type: string
+                        example: https://tiktok.com
+                      order_no:
+                        type: integer
+                        example: 2
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-13T00:16:58.437634+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-13T00:16:58.443714'
+          description: ''
   /int/v1/social-media/{id}:
+    get:
+      operationId: int_v1_social_media_retrieve
+      description: Endpoint for retrieving a specific social media setting by its
+        primary key
+      summary: Retrieve Specific Social Media
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Social Media
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Social media data retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Social media data retrieved successfully
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      platform:
+                        type: string
+                        example: Instagram
+                      icon:
+                        type: string
+                        example: https://instagram/favicon.ico
+                      url:
+                        type: string
+                        example: https://instagram.com
+                      order_no:
+                        type: integer
+                        example: 0
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-13T00:13:57.304284+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-14T01:32:04.715422'
+          description: ''
     patch:
       operationId: int_v1_social_media_update
       description: Endpoint for updating an existing social media setting
@@ -993,19 +1056,13 @@ paths:
                         format: date-time
                         example: '2025-11-14T01:45:12.345678'
           description: ''
+  /int/v1/menus:
     get:
-      operationId: int_v1_social_media_retrieve
-      description: Endpoint for retrieving a specific social media setting by its
-        primary key
-      summary: Retrieve Specific Social Media
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
+      operationId: int_v1_get_menu
+      description: Endpoint to retrieve the application menu structure.
+      summary: Get Application Menu
       tags:
-      - Internal / Social Media
+      - Internal / Menu
       security:
       - BearerAuth: []
       - {}
@@ -1014,7 +1071,7 @@ paths:
           content:
             application/json:
               schema:
-                description: Social media data retrieved successfully
+                description: Menus retrieved successfully
                 type: object
                 properties:
                   success:
@@ -1025,38 +1082,37 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: Social media data retrieved successfully
+                    example: Menus retrieved successfully
                   data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 1
-                      platform:
-                        type: string
-                        example: Instagram
-                      icon:
-                        type: string
-                        example: https://instagram/favicon.ico
-                      url:
-                        type: string
-                        example: https://instagram.com
-                      order_no:
-                        type: integer
-                        example: 0
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-13T00:13:57.304284+07:00'
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 5
+                        items:
+                          type: array
+                          items: {}
+                          example: []
+                        name:
+                          type: string
+                          example: Contact
+                        position:
+                          type: string
+                          example: header
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-16T03:09:27.416438+07:00'
                   meta:
                     type: object
                     properties:
                       timestamp:
                         type: string
                         format: date-time
-                        example: '2025-11-14T01:32:04.715422'
+                        example: '2025-11-16T03:09:30.434680'
           description: ''
-  /int/v1/menus:
     post:
       operationId: int_v1_create_menu
       description: Endpoint to create a new application menu.
@@ -1161,10 +1217,17 @@ paths:
                         format: date-time
                         example: '2025-11-16T03:08:02.321171'
           description: ''
+  /int/v1/menus/{id}:
     get:
-      operationId: int_v1_get_menu
-      description: Endpoint to retrieve the application menu structure.
-      summary: Get Application Menu
+      operationId: int_v1_specific_menu_get
+      description: Endpoint to retrieve a specific application menu by its ID.
+      summary: Get Specific Application Menu
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
       - Internal / Menu
       security:
@@ -1175,7 +1238,7 @@ paths:
           content:
             application/json:
               schema:
-                description: Menus retrieved successfully
+                description: Menu updated successfully
                 type: object
                 properties:
                   success:
@@ -1186,38 +1249,59 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: Menus retrieved successfully
+                    example: Menu updated successfully
                   data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                          example: 5
-                        items:
-                          type: array
-                          items: {}
-                          example: []
-                        name:
-                          type: string
-                          example: Contact
-                        position:
-                          type: string
-                          example: header
-                        created_at:
-                          type: string
-                          format: date-time
-                          example: '2025-11-16T03:09:27.416438+07:00'
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 4
+                      items:
+                        type: array
+                        items: {}
+                        example: []
+                      name:
+                        type: string
+                        example: About
+                      position:
+                        type: string
+                        example: header
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-16T03:06:17.942393+07:00'
                   meta:
                     type: object
                     properties:
                       timestamp:
                         type: string
                         format: date-time
-                        example: '2025-11-16T03:09:30.434680'
+                        example: '2025-11-16T03:10:14.853766'
           description: ''
-  /int/v1/menus/{id}:
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Menu not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Menu with id '44' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-16T03:10:46.083547'
+          description: ''
     patch:
       operationId: int_v1_specific_menu_update
       description: Endpoint to update a specific application menu by its ID.
@@ -1395,90 +1479,6 @@ paths:
                         format: date-time
                         example: '2025-11-16T03:10:46.083547'
           description: ''
-    get:
-      operationId: int_v1_specific_menu_get
-      description: Endpoint to retrieve a specific application menu by its ID.
-      summary: Get Specific Application Menu
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - Internal / Menu
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Menu updated successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Menu updated successfully
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 4
-                      items:
-                        type: array
-                        items: {}
-                        example: []
-                      name:
-                        type: string
-                        example: About
-                      position:
-                        type: string
-                        example: header
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-16T03:06:17.942393+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-16T03:10:14.853766'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                description: Menu not found
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  status_code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: Menu with id '44' does not exist.
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-16T03:10:46.083547'
-          description: ''
   /int/v1/menus/{menu_id}/items:
     get:
       operationId: int_v1_menu_items_get
@@ -1499,6 +1499,72 @@ paths:
         '200':
           description: No response body
   /int/v1/menu-items:
+    get:
+      operationId: int_v1_get_menu_items
+      description: Retrieve all menu items.
+      summary: Get Menu Items
+      tags:
+      - Internal / Menu Item
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Menu items retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Menu items retrieved successfully
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 10
+                        menu:
+                          type: integer
+                          example: 5
+                        parent:
+                          type:
+                          - integer
+                          - 'null'
+                          example: 7
+                        lang:
+                          type: string
+                          example: en
+                        label:
+                          type: string
+                          example: first menu item
+                        link:
+                          type: string
+                          example: linkasas
+                        order_no:
+                          type: integer
+                          example: 0
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-22T23:28:54.731251+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-22T23:31:07.208419'
+          description: ''
     post:
       operationId: int_v1_create_menu_item
       description: Create a new menu item.
@@ -1636,10 +1702,17 @@ paths:
                         format: date-time
                         example: '2025-11-22T23:23:17.220288'
           description: ''
+  /int/v1/menu-items/{id}:
     get:
-      operationId: int_v1_get_menu_items
-      description: Retrieve all menu items.
-      summary: Get Menu Items
+      operationId: int_v1_get_specific_menu_item
+      description: Retrieve a specific menu item by its ID.
+      summary: Get Specific Menu Item
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
       tags:
       - Internal / Menu Item
       security:
@@ -1650,7 +1723,7 @@ paths:
           content:
             application/json:
               schema:
-                description: Menu items retrieved successfully
+                description: Menu item retrieved successfully
                 type: object
                 properties:
                   success:
@@ -1661,48 +1734,69 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: Menu items retrieved successfully
+                    example: Menu item retrieved successfully
                   data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                          example: 10
-                        menu:
-                          type: integer
-                          example: 5
-                        parent:
-                          type:
-                          - integer
-                          - 'null'
-                          example: 7
-                        lang:
-                          type: string
-                          example: en
-                        label:
-                          type: string
-                          example: first menu item
-                        link:
-                          type: string
-                          example: linkasas
-                        order_no:
-                          type: integer
-                          example: 0
-                        created_at:
-                          type: string
-                          format: date-time
-                          example: '2025-11-22T23:28:54.731251+07:00'
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 2
+                      menu:
+                        type: integer
+                        example: 5
+                      parent:
+                        type:
+                        - integer
+                        - 'null'
+                        example: null
+                      lang:
+                        type: string
+                        example: en
+                      label:
+                        type: string
+                        example: first menu item
+                      link:
+                        type: string
+                        example: linkasas
+                      order_no:
+                        type: integer
+                        example: 0
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-22T23:19:06.970907+07:00'
                   meta:
                     type: object
                     properties:
                       timestamp:
                         type: string
                         format: date-time
-                        example: '2025-11-22T23:31:07.208419'
+                        example: '2025-11-22T23:34:26.621686'
           description: ''
-  /int/v1/menu-items/{id}:
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Menu item not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: MenuItem with id '112' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-22T23:35:01.660931'
+          description: ''
     patch:
       operationId: int_v1_update_specific_menu_item
       description: Update a specific menu item by its ID.
@@ -1872,18 +1966,26 @@ paths:
                         format: date-time
                         example: '2025-11-22T23:54:49.696625'
           description: ''
+  /int/v1/banners:
     get:
-      operationId: int_v1_get_specific_menu_item
-      description: Retrieve a specific menu item by its ID.
-      summary: Get Specific Menu Item
+      operationId: int_v1_banner_get_banners
+      description: Retrieve all banners.
+      summary: Retrieve all banners
       parameters:
-      - in: path
-        name: id
+      - in: query
+        name: page
         schema:
           type: integer
-        required: true
+          default: 1
+        description: 'Page number (default: 1)'
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          default: 20
+        description: 'Number of items per page (default: 20, max: 100)'
       tags:
-      - Internal / Menu Item
+      - Internal / Banner
       security:
       - BearerAuth: []
       - {}
@@ -1892,7 +1994,7 @@ paths:
           content:
             application/json:
               schema:
-                description: Menu item retrieved successfully
+                description: Banners retrieved successfully
                 type: object
                 properties:
                   success:
@@ -1903,70 +2005,70 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: Menu item retrieved successfully
+                    example: Banners retrieved successfully.
                   data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 2
-                      menu:
-                        type: integer
-                        example: 5
-                      parent:
-                        type:
-                        - integer
-                        - 'null'
-                        example: null
-                      lang:
-                        type: string
-                        example: en
-                      label:
-                        type: string
-                        example: first menu item
-                      link:
-                        type: string
-                        example: linkasas
-                      order_no:
-                        type: integer
-                        example: 0
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-22T23:19:06.970907+07:00'
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 6
+                        title:
+                          type: string
+                          example: string
+                        subtitle:
+                          type: string
+                          example: string
+                        image:
+                          type: string
+                          example: /media/uploads/banners/lovepik-taobao-tmall-e-commerce-banner-background-image_500603827_Z4EGq4A.jpg
+                        link_url:
+                          type: string
+                          example: string
+                        order_no:
+                          type: integer
+                          example: 0
+                        is_active:
+                          type: boolean
+                          example: true
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-26T19:06:14.763201+07:00'
+                        updated_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-26T19:06:14.763222+07:00'
                   meta:
                     type: object
                     properties:
                       timestamp:
                         type: string
                         format: date-time
-                        example: '2025-11-22T23:34:26.621686'
+                        example: '2025-11-26T19:37:20.085607'
+                      pagination:
+                        type: object
+                        properties:
+                          current_page:
+                            type: integer
+                            example: 1
+                          per_page:
+                            type: integer
+                            example: 20
+                          total_pages:
+                            type: integer
+                            example: 1
+                          total_items:
+                            type: integer
+                            example: 1
+                          has_next:
+                            type: boolean
+                            example: false
+                          has_previous:
+                            type: boolean
+                            example: false
           description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                description: Menu item not found
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  status_code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: MenuItem with id '112' does not exist.
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-22T23:35:01.660931'
-          description: ''
-  /int/v1/banners:
     post:
       operationId: int_v1_banner_create_banner
       description: Create a new banner with file upload support.
@@ -2079,23 +2181,17 @@ paths:
                         format: date-time
                         example: '2025-11-26T19:11:39.498145'
           description: ''
+  /int/v1/banners/{id}:
     get:
-      operationId: int_v1_banner_get_banners
-      description: Retrieve all banners.
-      summary: Retrieve all banners
+      operationId: int_v1_banner_get_specific_banner
+      description: Retrieve a specific banner by its ID.
+      summary: Retrieve a specific banner by ID
       parameters:
-      - in: query
-        name: page
+      - in: path
+        name: id
         schema:
           type: integer
-          default: 1
-        description: 'Page number (default: 1)'
-      - in: query
-        name: page_size
-        schema:
-          type: integer
-          default: 20
-        description: 'Number of items per page (default: 20, max: 100)'
+        required: true
       tags:
       - Internal / Banner
       security:
@@ -2106,7 +2202,7 @@ paths:
           content:
             application/json:
               schema:
-                description: Banners retrieved successfully
+                description: Banner retrieved successfully
                 type: object
                 properties:
                   success:
@@ -2117,71 +2213,47 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: Banners retrieved successfully.
+                    example: Banner retrieved successfully.
                   data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                          example: 6
-                        title:
-                          type: string
-                          example: string
-                        subtitle:
-                          type: string
-                          example: string
-                        image:
-                          type: string
-                          example: /media/uploads/banners/lovepik-taobao-tmall-e-commerce-banner-background-image_500603827_Z4EGq4A.jpg
-                        link_url:
-                          type: string
-                          example: string
-                        order_no:
-                          type: integer
-                          example: 0
-                        is_active:
-                          type: boolean
-                          example: true
-                        created_at:
-                          type: string
-                          format: date-time
-                          example: '2025-11-26T19:06:14.763201+07:00'
-                        updated_at:
-                          type: string
-                          format: date-time
-                          example: '2025-11-26T19:06:14.763222+07:00'
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 6
+                      title:
+                        type: string
+                        example: string
+                      subtitle:
+                        type: string
+                        example: string
+                      image:
+                        type: string
+                        example: /media/uploads/banners/lovepik-taobao-tmall-e-commerce-banner-background-image_500603827_Z4EGq4A.jpg
+                      link_url:
+                        type: string
+                        example: string
+                      order_no:
+                        type: integer
+                        example: 0
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-26T19:06:14.763201+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-26T19:06:14.763222+07:00'
                   meta:
                     type: object
                     properties:
                       timestamp:
                         type: string
                         format: date-time
-                        example: '2025-11-26T19:37:20.085607'
-                      pagination:
-                        type: object
-                        properties:
-                          current_page:
-                            type: integer
-                            example: 1
-                          per_page:
-                            type: integer
-                            example: 20
-                          total_pages:
-                            type: integer
-                            example: 1
-                          total_items:
-                            type: integer
-                            example: 1
-                          has_next:
-                            type: boolean
-                            example: false
-                          has_previous:
-                            type: boolean
-                            example: false
+                        example: '2025-11-26T19:48:32.052814'
           description: ''
-  /int/v1/banners/{id}:
     post:
       operationId: int_v1_banner_update_specific_banner
       description: Update a specific banner by its ID.
@@ -2385,78 +2457,6 @@ paths:
                         format: date-time
                         example: '2025-11-26T20:04:41.117151'
           description: ''
-    get:
-      operationId: int_v1_banner_get_specific_banner
-      description: Retrieve a specific banner by its ID.
-      summary: Retrieve a specific banner by ID
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - Internal / Banner
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Banner retrieved successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Banner retrieved successfully.
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 6
-                      title:
-                        type: string
-                        example: string
-                      subtitle:
-                        type: string
-                        example: string
-                      image:
-                        type: string
-                        example: /media/uploads/banners/lovepik-taobao-tmall-e-commerce-banner-background-image_500603827_Z4EGq4A.jpg
-                      link_url:
-                        type: string
-                        example: string
-                      order_no:
-                        type: integer
-                        example: 0
-                      is_active:
-                        type: boolean
-                        example: true
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-26T19:06:14.763201+07:00'
-                      updated_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-26T19:06:14.763222+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-26T19:48:32.052814'
-          description: ''
   /int/v1/subscribers:
     get:
       operationId: int_v1_get_all_subscribers
@@ -2542,70 +2542,6 @@ paths:
                             example: false
           description: ''
   /int/v1/subscribers/{id}:
-    delete:
-      operationId: int_v1_delete_subscriber
-      description: Delete a specific subscriber by its ID.
-      summary: Delete Subscriber
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - Internal / Subscriber
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Subscriber deleted successfully.
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Subscriber deleted successfully.
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-27T20:26:17.949363'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                description: Subscriber not found
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  status_code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: Subscriber with id '12' does not exist.
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-27T20:24:37.935078'
-          description: ''
     get:
       operationId: int_v1_get_specific_subscriber
       description: Retrieve a specific subscriber by its ID.
@@ -2684,7 +2620,187 @@ paths:
                         format: date-time
                         example: '2025-11-27T20:24:37.935078'
           description: ''
+    delete:
+      operationId: int_v1_delete_subscriber
+      description: Delete a specific subscriber by its ID.
+      summary: Delete Subscriber
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Subscriber
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Subscriber deleted successfully.
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Subscriber deleted successfully.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-27T20:26:17.949363'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Subscriber not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Subscriber with id '12' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-27T20:24:37.935078'
+          description: ''
   /int/v1/pages:
+    get:
+      operationId: int_v1_page_get_pages
+      description: Retrieve all pages with pagination support.
+      summary: Retrieve all pages
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: 'Page number (default: 1)'
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          default: 20
+        description: 'Number of items per page (default: 20, max: 100)'
+      tags:
+      - Internal / Page
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Pages retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Pages retrieved successfully.
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        slug:
+                          type: string
+                          example: about-us
+                        title:
+                          type: string
+                          example: About Us
+                        content:
+                          type: string
+                          example: <p>Welcome to our company...</p>
+                        meta_title:
+                          type: string
+                          example: About Us - Company Name
+                        meta_description:
+                          type: string
+                          example: Learn more about our company history and values.
+                        meta_keywords:
+                          type: string
+                          example: about, company, history, values
+                        template:
+                          type: string
+                          example: default
+                        is_active:
+                          type: boolean
+                          example: true
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-28T10:30:00.000000+07:00'
+                        updated_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-28T10:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+                      pagination:
+                        type: object
+                        properties:
+                          current_page:
+                            type: integer
+                            example: 1
+                          per_page:
+                            type: integer
+                            example: 20
+                          total_pages:
+                            type: integer
+                            example: 1
+                          total_items:
+                            type: integer
+                            example: 5
+                          has_next:
+                            type: boolean
+                            example: false
+                          has_previous:
+                            type: boolean
+                            example: false
+                          next_page:
+                            type: integer
+                            nullable: true
+                            example: null
+                          previous_page:
+                            type: integer
+                            nullable: true
+                            example: null
+          description: ''
     post:
       operationId: int_v1_page_create_page
       description: Create a new page with content and SEO metadata.
@@ -2807,187 +2923,7 @@ paths:
                         format: date-time
                         example: '2025-11-28T10:30:00.000000'
           description: ''
-    get:
-      operationId: int_v1_page_get_pages
-      description: Retrieve all pages with pagination support.
-      summary: Retrieve all pages
-      parameters:
-      - in: query
-        name: page
-        schema:
-          type: integer
-          default: 1
-        description: 'Page number (default: 1)'
-      - in: query
-        name: page_size
-        schema:
-          type: integer
-          default: 20
-        description: 'Number of items per page (default: 20, max: 100)'
-      tags:
-      - Internal / Page
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Pages retrieved successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Pages retrieved successfully.
-                  data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                          example: 1
-                        slug:
-                          type: string
-                          example: about-us
-                        title:
-                          type: string
-                          example: About Us
-                        content:
-                          type: string
-                          example: <p>Welcome to our company...</p>
-                        meta_title:
-                          type: string
-                          example: About Us - Company Name
-                        meta_description:
-                          type: string
-                          example: Learn more about our company history and values.
-                        meta_keywords:
-                          type: string
-                          example: about, company, history, values
-                        template:
-                          type: string
-                          example: default
-                        is_active:
-                          type: boolean
-                          example: true
-                        created_at:
-                          type: string
-                          format: date-time
-                          example: '2025-11-28T10:30:00.000000+07:00'
-                        updated_at:
-                          type: string
-                          format: date-time
-                          example: '2025-11-28T10:30:00.000000+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T10:30:00.000000'
-                      pagination:
-                        type: object
-                        properties:
-                          current_page:
-                            type: integer
-                            example: 1
-                          per_page:
-                            type: integer
-                            example: 20
-                          total_pages:
-                            type: integer
-                            example: 1
-                          total_items:
-                            type: integer
-                            example: 5
-                          has_next:
-                            type: boolean
-                            example: false
-                          has_previous:
-                            type: boolean
-                            example: false
-                          next_page:
-                            type: integer
-                            nullable: true
-                            example: null
-                          previous_page:
-                            type: integer
-                            nullable: true
-                            example: null
-          description: ''
   /int/v1/pages/{id}:
-    delete:
-      operationId: int_v1_page_delete_specific_page
-      description: Delete a specific page by its ID.
-      summary: Delete a specific page by ID
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
-      tags:
-      - Internal / Page
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Page deleted successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Page deleted successfully.
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T12:00:00.000000'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                description: Page not found
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  status_code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: Page with id '99' does not exist.
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T12:00:00.000000'
-          description: ''
     get:
       operationId: int_v1_page_get_specific_page
       description: Retrieve a specific page by its ID.
@@ -3202,6 +3138,70 @@ paths:
                         type: string
                         format: date-time
                         example: '2025-11-28T11:30:00.000000'
+          description: ''
+    delete:
+      operationId: int_v1_page_delete_specific_page
+      description: Delete a specific page by its ID.
+      summary: Delete a specific page by ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Page
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Page deleted successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Page deleted successfully.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:00:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Page not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Page with id '99' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:00:00.000000'
           description: ''
   /int/v1/pages/{id}/toggle:
     patch:
@@ -3421,145 +3421,6 @@ paths:
                         example: '2025-11-28T10:30:00.000000'
           description: ''
   /int/v1/products:
-    post:
-      operationId: int_v1_product_create_product
-      description: Create a new product with file upload support.
-      summary: Create Product
-      tags:
-      - Internal / Product
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PostCreateProductRequestRequest'
-        required: true
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Product created successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Product created successfully.
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 1
-                      slug:
-                        type: string
-                        example: ceramic-tile-floor-01
-                      name:
-                        type: string
-                        example: Premium Ceramic Floor Tile
-                      lang:
-                        type: string
-                        example: en
-                      model:
-                        type: string
-                        example: CT-FL-001
-                      size:
-                        type: string
-                        example: 60x60 cm
-                      description:
-                        type: string
-                        example: High-quality ceramic floor tile suitable for residential
-                          and commercial use.
-                      product_type:
-                        type: string
-                        example: lantai
-                      image:
-                        type: string
-                        format: uri
-                        example: /media/uploads/products/ceramic-tile-floor-01_main.jpg
-                      gallery:
-                        type: array
-                        items:
-                          type: string
-                          format: uri
-                        example:
-                        - /media/uploads/products/gallery/ceramic-tile-floor-01_gallery_0.jpg
-                        - /media/uploads/products/gallery/ceramic-tile-floor-01_gallery_1.jpg
-                      brochure:
-                        type: object
-                        nullable: true
-                        properties:
-                          id:
-                            type: integer
-                            example: 1
-                          title:
-                            type: string
-                            example: Product Brochure
-                          file_url:
-                            type: string
-                            format: uri
-                            example: /media/brochures/product-brochure.pdf
-                      meta_title:
-                        type: string
-                        example: Premium Ceramic Floor Tile - High Quality
-                      meta_description:
-                        type: string
-                        example: High-quality ceramic floor tile suitable for residential
-                          and commercial use. Available in multiple sizes and finishes.
-                      meta_keywords:
-                        type: string
-                        example: ceramic, tile, floor, premium, lantai
-                      is_active:
-                        type: boolean
-                        example: true
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T10:30:00.000000+07:00'
-                      updated_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T10:30:00.000000+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T10:30:00.000000'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                description: Validation error
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  status_code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: Product with this slug already exists.
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T10:30:00.000000'
-          description: ''
     get:
       operationId: int_v1_product_get_products
       description: Retrieve all products with optional filtering by type, language,
@@ -3728,19 +3589,18 @@ paths:
                             type: boolean
                             example: false
           description: ''
-  /int/v1/products/{id}:
-    delete:
-      operationId: int_v1_product_delete_specific_product
-      description: Delete a specific product by its ID.
-      summary: Delete a specific product by ID
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
+    post:
+      operationId: int_v1_product_create_product
+      description: Create a new product with file upload support.
+      summary: Create Product
       tags:
       - Internal / Product
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreateProductRequestRequest'
+        required: true
       security:
       - BearerAuth: []
       - {}
@@ -3749,7 +3609,7 @@ paths:
           content:
             application/json:
               schema:
-                description: Product deleted successfully
+                description: Product created successfully
                 type: object
                 properties:
                   success:
@@ -3760,20 +3620,95 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: Product deleted successfully.
+                    example: Product created successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: ceramic-tile-floor-01
+                      name:
+                        type: string
+                        example: Premium Ceramic Floor Tile
+                      lang:
+                        type: string
+                        example: en
+                      model:
+                        type: string
+                        example: CT-FL-001
+                      size:
+                        type: string
+                        example: 60x60 cm
+                      description:
+                        type: string
+                        example: High-quality ceramic floor tile suitable for residential
+                          and commercial use.
+                      product_type:
+                        type: string
+                        example: lantai
+                      image:
+                        type: string
+                        format: uri
+                        example: /media/uploads/products/ceramic-tile-floor-01_main.jpg
+                      gallery:
+                        type: array
+                        items:
+                          type: string
+                          format: uri
+                        example:
+                        - /media/uploads/products/gallery/ceramic-tile-floor-01_gallery_0.jpg
+                        - /media/uploads/products/gallery/ceramic-tile-floor-01_gallery_1.jpg
+                      brochure:
+                        type: object
+                        nullable: true
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          title:
+                            type: string
+                            example: Product Brochure
+                          file_url:
+                            type: string
+                            format: uri
+                            example: /media/brochures/product-brochure.pdf
+                      meta_title:
+                        type: string
+                        example: Premium Ceramic Floor Tile - High Quality
+                      meta_description:
+                        type: string
+                        example: High-quality ceramic floor tile suitable for residential
+                          and commercial use. Available in multiple sizes and finishes.
+                      meta_keywords:
+                        type: string
+                        example: ceramic, tile, floor, premium, lantai
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
                   meta:
                     type: object
                     properties:
                       timestamp:
                         type: string
                         format: date-time
-                        example: '2025-11-28T12:15:45.250000'
+                        example: '2025-11-28T10:30:00.000000'
           description: ''
         '400':
           content:
             application/json:
               schema:
-                description: Product not found
+                description: Validation error
                 type: object
                 properties:
                   success:
@@ -3784,15 +3719,16 @@ paths:
                     example: 400
                   message:
                     type: string
-                    example: Product with id '99' does not exist.
+                    example: Product with this slug already exists.
                   meta:
                     type: object
                     properties:
                       timestamp:
                         type: string
                         format: date-time
-                        example: '2025-11-28T12:15:45.250000'
+                        example: '2025-11-28T10:30:00.000000'
           description: ''
+  /int/v1/products/{id}:
     get:
       operationId: int_v1_product_get_specific_product
       description: Retrieve a specific product by its ID.
@@ -4095,6 +4031,70 @@ paths:
                         type: string
                         format: date-time
                         example: '2025-11-28T11:45:30.130000'
+          description: ''
+    delete:
+      operationId: int_v1_product_delete_specific_product
+      description: Delete a specific product by its ID.
+      summary: Delete a specific product by ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Product
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Product deleted successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Product deleted successfully.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:15:45.250000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Product not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Product with id '99' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:15:45.250000'
           description: ''
   /int/v1/products/{id}/toggle:
     patch:
@@ -4634,84 +4634,6 @@ paths:
                         example: '2025-11-28T15:05:20.305000'
           description: ''
   /int/v1/brochures:
-    post:
-      operationId: int_v1_brochure_create_brochure
-      description: Create a new brochure with file upload support.
-      summary: Create Brochure
-      tags:
-      - Internal / Brochure
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PostCreateBrochureRequestRequest'
-        required: true
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                description: Brochure created successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 201
-                  message:
-                    type: string
-                    example: Brochure created successfully.
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 1
-                      title:
-                        type: string
-                        example: Premium Product Brochure
-                      file_url:
-                        type: string
-                        format: uri
-                        example: /media/uploads/brochure/premium-product-brochure.pdf
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T10:30:00.000000+07:00'
-                      updated_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T10:30:00.000000+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T10:30:00.123456'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                description: Bad Request
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  status_code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: Brochure with this title already exists.
-          description: ''
     get:
       operationId: int_v1_brochure_get_brochures
       description: Retrieve all brochures with optional search filtering and pagination.
@@ -4808,28 +4730,27 @@ paths:
                         format: date-time
                         example: '2025-11-28T10:30:00.123456'
           description: ''
-  /int/v1/brochures/{id}:
-    delete:
-      operationId: int_v1_brochure_delete_specific_brochure
-      description: Delete a specific brochure by its ID.
-      summary: Delete Specific Brochure
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
+    post:
+      operationId: int_v1_brochure_create_brochure
+      description: Create a new brochure with file upload support.
+      summary: Create Brochure
       tags:
       - Internal / Brochure
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreateBrochureRequestRequest'
+        required: true
       security:
       - BearerAuth: []
       - {}
       responses:
-        '200':
+        '201':
           content:
             application/json:
               schema:
-                description: Brochure deleted successfully
+                description: Brochure created successfully
                 type: object
                 properties:
                   success:
@@ -4837,23 +4758,44 @@ paths:
                     example: true
                   status_code:
                     type: integer
-                    example: 200
+                    example: 201
                   message:
                     type: string
-                    example: Brochure deleted successfully.
+                    example: Brochure created successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      title:
+                        type: string
+                        example: Premium Product Brochure
+                      file_url:
+                        type: string
+                        format: uri
+                        example: /media/uploads/brochure/premium-product-brochure.pdf
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
                   meta:
                     type: object
                     properties:
                       timestamp:
                         type: string
                         format: date-time
-                        example: '2025-11-28T11:45:00.123456'
+                        example: '2025-11-28T10:30:00.123456'
           description: ''
-        '404':
+        '400':
           content:
             application/json:
               schema:
-                description: Brochure not found
+                description: Bad Request
                 type: object
                 properties:
                   success:
@@ -4861,11 +4803,12 @@ paths:
                     example: false
                   status_code:
                     type: integer
-                    example: 404
+                    example: 400
                   message:
                     type: string
-                    example: Brochure with id '1' does not exist.
+                    example: Brochure with this title already exists.
           description: ''
+  /int/v1/brochures/{id}:
     get:
       operationId: int_v1_brochure_get_specific_brochure
       description: Retrieve a specific brochure by its ID.
@@ -5044,6 +4987,63 @@ paths:
                     type: string
                     example: Brochure with id '1' does not exist.
           description: ''
+    delete:
+      operationId: int_v1_brochure_delete_specific_brochure
+      description: Delete a specific brochure by its ID.
+      summary: Delete Specific Brochure
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Brochure
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Brochure deleted successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Brochure deleted successfully.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T11:45:00.123456'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                description: Brochure not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 404
+                  message:
+                    type: string
+                    example: Brochure with id '1' does not exist.
+          description: ''
   /int/v1/brochures/{id}/file:
     post:
       operationId: int_v1_brochure_upload_brochure_file
@@ -5147,113 +5147,6 @@ paths:
                     example: Brochure with id '1' does not exist.
           description: ''
   /int/v1/projects:
-    post:
-      operationId: int_v1_project_create_project
-      description: Create a new project with file upload support.
-      summary: Create Project
-      tags:
-      - Internal / Project
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PostCreateProjectRequestRequest'
-        required: true
-      security:
-      - BearerAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: Project created successfully
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  status_code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Project created successfully.
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        example: 1
-                      title:
-                        type: string
-                        example: Modern Office Building
-                      slug:
-                        type: string
-                        example: modern-office-building
-                      location:
-                        type: string
-                        example: Jakarta, Indonesia
-                      description:
-                        type: string
-                        example: A comprehensive description of the project
-                      image:
-                        type: string
-                        format: uri
-                        example: /media/uploads/projects/modern-office-building.jpg
-                      gallery:
-                        type: array
-                        items:
-                          type: string
-                        example:
-                        - /media/uploads/projects/gallery/modern-office-building_gallery_0.jpg
-                      meta_title:
-                        type: string
-                        example: Modern Office Building Project
-                      meta_description:
-                        type: string
-                        example: SEO description for the project
-                      meta_keywords:
-                        type: string
-                        example: office, building, modern, architecture
-                      is_active:
-                        type: boolean
-                        example: true
-                      created_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T10:00:00.000000+07:00'
-                      updated_at:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T10:00:00.000000+07:00'
-                  meta:
-                    type: object
-                    properties:
-                      timestamp:
-                        type: string
-                        format: date-time
-                        example: '2025-11-28T10:00:00.000000'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                description: Bad Request - Validation error
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: false
-                  status_code:
-                    type: integer
-                    example: 400
-                  message:
-                    type: string
-                    example: Project with this slug already exists.
-                  meta:
-                    type: object
-          description: ''
     get:
       operationId: int_v1_project_get_projects
       description: Retrieve all projects with optional filtering and pagination.
@@ -5381,19 +5274,18 @@ paths:
                             type: boolean
                             example: false
           description: ''
-  /int/v1/projects/{id}:
-    delete:
-      operationId: int_v1_project_delete_specific_project
-      description: Delete a specific project by its ID.
-      summary: Delete a specific project by ID
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        required: true
+    post:
+      operationId: int_v1_project_create_project
+      description: Create a new project with file upload support.
+      summary: Create Project
       tags:
       - Internal / Project
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreateProjectRequestRequest'
+        required: true
       security:
       - BearerAuth: []
       - {}
@@ -5402,7 +5294,7 @@ paths:
           content:
             application/json:
               schema:
-                description: Project deleted successfully.
+                description: Project created successfully
                 type: object
                 properties:
                   success:
@@ -5413,19 +5305,68 @@ paths:
                     example: 200
                   message:
                     type: string
-                    example: Project deleted successfully.
+                    example: Project created successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      title:
+                        type: string
+                        example: Modern Office Building
+                      slug:
+                        type: string
+                        example: modern-office-building
+                      location:
+                        type: string
+                        example: Jakarta, Indonesia
+                      description:
+                        type: string
+                        example: A comprehensive description of the project
+                      image:
+                        type: string
+                        format: uri
+                        example: /media/uploads/projects/modern-office-building.jpg
+                      gallery:
+                        type: array
+                        items:
+                          type: string
+                        example:
+                        - /media/uploads/projects/gallery/modern-office-building_gallery_0.jpg
+                      meta_title:
+                        type: string
+                        example: Modern Office Building Project
+                      meta_description:
+                        type: string
+                        example: SEO description for the project
+                      meta_keywords:
+                        type: string
+                        example: office, building, modern, architecture
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:00:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:00:00.000000+07:00'
                   meta:
                     type: object
                     properties:
                       timestamp:
                         type: string
                         format: date-time
+                        example: '2025-11-28T10:00:00.000000'
           description: ''
         '400':
           content:
             application/json:
               schema:
-                description: Project not found
+                description: Bad Request - Validation error
                 type: object
                 properties:
                   success:
@@ -5436,10 +5377,11 @@ paths:
                     example: 400
                   message:
                     type: string
-                    example: Project with id '1' does not exist.
+                    example: Project with this slug already exists.
                   meta:
                     type: object
           description: ''
+  /int/v1/projects/{id}:
     get:
       operationId: int_v1_project_get_specific_project
       description: Retrieve a specific project by its ID.
@@ -5643,6 +5585,64 @@ paths:
             application/json:
               schema:
                 description: Project not found or validation error
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Project with id '1' does not exist.
+                  meta:
+                    type: object
+          description: ''
+    delete:
+      operationId: int_v1_project_delete_specific_project
+      description: Delete a specific project by its ID.
+      summary: Delete a specific project by ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Project
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Project deleted successfully.
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Project deleted successfully.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Project not found
                 type: object
                 properties:
                   success:
@@ -6220,6 +6220,1075 @@ paths:
                   meta:
                     type: object
           description: ''
+  /int/v1/articles:
+    get:
+      operationId: int_v1_article_get_articles
+      description: Retrieve all articles with pagination support and filtering options
+        (tags, author, search, active status).
+      summary: Retrieve all articles
+      parameters:
+      - in: query
+        name: author
+        schema:
+          type: string
+        description: Filter articles by author (case-insensitive partial match)
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+        description: Filter articles by active status
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: 'Page number (default: 1)'
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          default: 20
+        description: 'Number of items per page (default: 20, max: 100)'
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Search in article title and content (case-insensitive)
+      - in: query
+        name: tags
+        schema:
+          type: string
+        description: Filter articles by tags (case-insensitive partial match)
+      tags:
+      - Internal / Article
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Articles retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Articles retrieved successfully.
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        slug:
+                          type: string
+                          example: my-first-article
+                        title:
+                          type: string
+                          example: My First Article
+                        content:
+                          type: string
+                          example: <p>This is the content...</p>
+                        thumbnail:
+                          type: string
+                          nullable: true
+                          example: /media/articles/thumbnails/article1.jpg
+                        author:
+                          type: string
+                          example: John Doe
+                        tags:
+                          type: string
+                          example: tech, programming, django
+                        meta_title:
+                          type: string
+                          example: My First Article - Tech Blog
+                        meta_description:
+                          type: string
+                          example: Learn about technology...
+                        meta_keywords:
+                          type: string
+                          example: technology, programming
+                        published_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-28T10:30:00.000000+07:00'
+                        is_active:
+                          type: boolean
+                          example: true
+                        created_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-28T10:30:00.000000+07:00'
+                        updated_at:
+                          type: string
+                          format: date-time
+                          example: '2025-11-28T10:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+                      pagination:
+                        type: object
+                        properties:
+                          current_page:
+                            type: integer
+                            example: 1
+                          per_page:
+                            type: integer
+                            example: 20
+                          total_pages:
+                            type: integer
+                            example: 3
+                          total_items:
+                            type: integer
+                            example: 45
+                          has_next:
+                            type: boolean
+                            example: true
+                          has_previous:
+                            type: boolean
+                            example: false
+                          next_page:
+                            type: integer
+                            example: 2
+                          previous_page:
+                            type: integer
+                            nullable: true
+                            example: null
+          description: ''
+    post:
+      operationId: int_v1_article_create_article
+      description: Create a new article with content and SEO metadata. If is_active
+        is true, published_at will be automatically set to current time. If is_active
+        is false, published_at will be null. Use the publish endpoint to set a specific
+        publication date. If author field is empty, it will be automatically set from
+        current user's name.
+      summary: Create Article
+      tags:
+      - Internal / Article
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostCreateArticleRequestRequest'
+        required: true
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Article created successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Article created successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: my-first-article
+                      title:
+                        type: string
+                        example: My First Article
+                      content:
+                        type: string
+                        example: <p>This is the content of my article...</p>
+                      thumbnail:
+                        type: string
+                        nullable: true
+                        example: /media/articles/thumbnails/article1.jpg
+                      author:
+                        type: string
+                        example: John Doe
+                      tags:
+                        type: string
+                        example: tech, programming, django
+                      meta_title:
+                        type: string
+                        example: My First Article - Tech Blog
+                      meta_description:
+                        type: string
+                        example: Learn about the latest in technology and programming.
+                      meta_keywords:
+                        type: string
+                        example: technology, programming, django, python
+                      published_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        example: null
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Bad Request - Validation Error
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: An article with slug 'my-first-article' already exists.
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          example: slug
+                        message:
+                          type: string
+                          example: An article with slug 'my-first-article' already
+                            exists.
+                        code:
+                          type: string
+                          example: unique
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+          description: ''
+  /int/v1/articles/{id}:
+    get:
+      operationId: int_v1_article_get_specific_article
+      description: Retrieve a specific article by its ID.
+      summary: Retrieve a specific article by ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Article
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Article retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Article retrieved successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: my-first-article
+                      title:
+                        type: string
+                        example: My First Article
+                      content:
+                        type: string
+                        example: <p>This is the content of my article...</p>
+                      thumbnail:
+                        type: string
+                        nullable: true
+                        example: /media/articles/thumbnails/article1.jpg
+                      author:
+                        type: string
+                        example: John Doe
+                      tags:
+                        type: string
+                        example: tech, programming, django
+                      meta_title:
+                        type: string
+                        example: My First Article - Tech Blog
+                      meta_description:
+                        type: string
+                        example: Learn about the latest in technology.
+                      meta_keywords:
+                        type: string
+                        example: technology, programming, django
+                      published_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Article not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Article with id '99' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+          description: ''
+    put:
+      operationId: int_v1_article_update_specific_article
+      description: Update a specific article by its ID with new data.
+      summary: Update a specific article by ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Article
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PutUpdateArticleRequestRequest'
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Article updated successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Article updated successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: my-updated-article
+                      title:
+                        type: string
+                        example: My Updated Article
+                      content:
+                        type: string
+                        example: <p>Updated content...</p>
+                      thumbnail:
+                        type: string
+                        nullable: true
+                        example: /media/articles/thumbnails/article1.jpg
+                      author:
+                        type: string
+                        example: Jane Smith
+                      tags:
+                        type: string
+                        example: updated, tech
+                      meta_title:
+                        type: string
+                        example: Updated Article - Tech Blog
+                      meta_description:
+                        type: string
+                        example: Updated description.
+                      meta_keywords:
+                        type: string
+                        example: updated, technology
+                      published_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T11:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T11:30:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Bad Request - Article not found or validation error
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Article with id '99' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T11:30:00.000000'
+          description: ''
+    delete:
+      operationId: int_v1_article_delete_specific_article
+      description: Delete a specific article by its ID.
+      summary: Delete a specific article by ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Article
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Article deleted successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Article deleted successfully.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:00:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Article not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Article with id '99' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:00:00.000000'
+          description: ''
+  /int/v1/articles/slug/{slug}:
+    get:
+      operationId: int_v1_article_get_article_by_slug
+      description: Retrieve an article by its slug identifier.
+      summary: Retrieve an article by slug
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - Internal / Article
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Article retrieved successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Article retrieved successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: my-first-article
+                      title:
+                        type: string
+                        example: My First Article
+                      content:
+                        type: string
+                        example: <p>This is the content of my article...</p>
+                      thumbnail:
+                        type: string
+                        nullable: true
+                        example: /media/articles/thumbnails/article1.jpg
+                      author:
+                        type: string
+                        example: John Doe
+                      tags:
+                        type: string
+                        example: tech, programming, django
+                      meta_title:
+                        type: string
+                        example: My First Article - Tech Blog
+                      meta_description:
+                        type: string
+                        example: Learn about the latest in technology.
+                      meta_keywords:
+                        type: string
+                        example: technology, programming, django
+                      published_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Article not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Article with slug 'non-existent' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000'
+          description: ''
+  /int/v1/articles/{id}/toggle:
+    patch:
+      operationId: int_v1_article_toggle_article_status
+      description: Toggle the active status of a specific article.
+      summary: Toggle article active status
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Article
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchToggleArticleStatusRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchToggleArticleStatusRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchToggleArticleStatusRequestRequest'
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Article status updated successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Article status updated successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: my-first-article
+                      title:
+                        type: string
+                        example: My First Article
+                      content:
+                        type: string
+                        example: <p>This is the content...</p>
+                      thumbnail:
+                        type: string
+                        nullable: true
+                        example: /media/articles/thumbnails/article1.jpg
+                      author:
+                        type: string
+                        example: John Doe
+                      tags:
+                        type: string
+                        example: tech, programming
+                      meta_title:
+                        type: string
+                        example: My First Article - Tech Blog
+                      meta_description:
+                        type: string
+                        example: Learn about technology...
+                      meta_keywords:
+                        type: string
+                        example: technology, programming
+                      published_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        example: null
+                      is_active:
+                        type: boolean
+                        example: false
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:30:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Article not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Article with id '99' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:30:00.000000'
+          description: ''
+  /int/v1/articles/{id}/publish:
+    patch:
+      operationId: int_v1_article_publish_article
+      description: Publish or unpublish an article by setting the published_at timestamp.
+      summary: Publish/unpublish an article
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Article
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchPublishArticleRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchPublishArticleRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatchPublishArticleRequestRequest'
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Article published/unpublished successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Article published successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: my-first-article
+                      title:
+                        type: string
+                        example: My First Article
+                      content:
+                        type: string
+                        example: <p>This is the content...</p>
+                      thumbnail:
+                        type: string
+                        nullable: true
+                        example: /media/articles/thumbnails/article1.jpg
+                      author:
+                        type: string
+                        example: John Doe
+                      tags:
+                        type: string
+                        example: tech, programming
+                      meta_title:
+                        type: string
+                        example: My First Article - Tech Blog
+                      meta_description:
+                        type: string
+                        example: Learn about technology...
+                      meta_keywords:
+                        type: string
+                        example: technology, programming
+                      published_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:30:00.000000+07:00'
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:30:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:30:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Article not found
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Article with id '99' does not exist.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T12:30:00.000000'
+          description: ''
+  /int/v1/articles/{id}/thumbnail:
+    post:
+      operationId: int_v1_article_upload_thumbnail
+      description: Upload or update the thumbnail image for a specific article. Accepts
+        JPEG, PNG, JPG, and WebP files up to 5MB.
+      summary: Upload article thumbnail
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Internal / Article
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                thumbnail:
+                  type: string
+                  format: binary
+                  description: Image file for article thumbnail
+              required:
+              - thumbnail
+      security:
+      - BearerAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Thumbnail uploaded successfully
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  status_code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Thumbnail uploaded successfully.
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        example: 1
+                      slug:
+                        type: string
+                        example: my-first-article
+                      title:
+                        type: string
+                        example: My First Article
+                      content:
+                        type: string
+                        example: <p>This is the content...</p>
+                      thumbnail:
+                        type: string
+                        example: /media/articles/thumbnails/article1_new.jpg
+                      author:
+                        type: string
+                        example: John Doe
+                      tags:
+                        type: string
+                        example: tech, programming
+                      meta_title:
+                        type: string
+                        example: My First Article - Tech Blog
+                      meta_description:
+                        type: string
+                        example: Learn about technology...
+                      meta_keywords:
+                        type: string
+                        example: technology, programming
+                      published_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      is_active:
+                        type: boolean
+                        example: true
+                      created_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T10:30:00.000000+07:00'
+                      updated_at:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T13:00:00.000000+07:00'
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T13:00:00.000000'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                description: Bad Request - Article not found or invalid file
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  status_code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Invalid file type. Only JPEG, PNG, JPG, and WebP images
+                      are allowed.
+                  meta:
+                    type: object
+                    properties:
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: '2025-11-28T13:00:00.000000'
+          description: ''
   /pub/v1/subscribers:
     post:
       operationId: pub_v1_create_subscriber
@@ -6335,6 +7404,24 @@ components:
           nullable: true
           minLength: 1
           description: Email address of the user
+    PatchedPatchPublishArticleRequestRequest:
+      type: object
+      description: Serializer for publishing/unpublishing an article.
+      properties:
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Publication date and time. Use current time to publish, null
+            to unpublish.
+    PatchedPatchToggleArticleStatusRequestRequest:
+      type: object
+      description: Serializer for toggling article active status.
+      properties:
+        is_active:
+          type: boolean
+          description: Whether the article should be active or inactive. This also
+            manages the published_at field automatically.
     PatchedPatchTogglePageStatusRequestRequest:
       type: object
       description: Serializer for toggling page active status.
@@ -6472,6 +7559,54 @@ components:
       required:
       - password
       - username
+    PostCreateArticleRequestRequest:
+      type: object
+      description: Serializer for creating a new article.
+      properties:
+        slug:
+          type: string
+          description: URL slug for the article. If empty, will be generated from
+            title.
+          maxLength: 255
+        title:
+          type: string
+          minLength: 1
+          description: Title of the article.
+          maxLength: 255
+        content:
+          type: string
+          minLength: 1
+          description: HTML content of the article.
+        thumbnail:
+          type: string
+          format: binary
+          description: Thumbnail image for the article.
+        author:
+          type: string
+          description: Author name of the article. If empty, will be set from current
+            user's name.
+          maxLength: 100
+        tags:
+          type: string
+          description: Tags/categories separated by commas.
+          maxLength: 255
+        meta_title:
+          type: string
+          description: Meta title for SEO purposes.
+          maxLength: 255
+        meta_description:
+          type: string
+          description: Meta description for SEO purposes.
+        meta_keywords:
+          type: string
+          description: Meta keywords for SEO purposes.
+        is_active:
+          type: boolean
+          description: Whether the article is active and visible to public. When true,
+            published_at is automatically set to current time.
+      required:
+      - content
+      - title
     PostCreateBannerRequestRequest:
       type: object
       description: Serializer for creating a new banner.
@@ -6888,6 +8023,55 @@ components:
       required:
       - current_password
       - new_password
+    PutUpdateArticleRequestRequest:
+      type: object
+      description: Serializer for updating an existing article.
+      properties:
+        slug:
+          type: string
+          description: URL slug for the article. If empty, will be generated from
+            title.
+          maxLength: 255
+        title:
+          type: string
+          minLength: 1
+          description: Title of the article.
+          maxLength: 255
+        content:
+          type: string
+          minLength: 1
+          description: HTML content of the article.
+        thumbnail:
+          type: string
+          format: binary
+          description: Thumbnail image for the article.
+        author:
+          type: string
+          description: Author name of the article.
+          maxLength: 100
+        tags:
+          type: string
+          description: Tags/categories separated by commas.
+          maxLength: 255
+        meta_title:
+          type: string
+          description: Meta title for SEO purposes.
+          maxLength: 255
+        meta_description:
+          type: string
+          description: Meta description for SEO purposes.
+        meta_keywords:
+          type: string
+          description: Meta keywords for SEO purposes.
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Publication date and time.
+        is_active:
+          type: boolean
+          description: Whether the article is active and visible to public. When true,
+            published_at is automatically managed.
     PutUpdateBrochureRequestRequest:
       type: object
       description: Serializer for updating an existing brochure.
@@ -7069,5 +8253,7 @@ tags:
   description: Application brochure management
 - name: Internal / Project
   description: Application project management
+- name: Internal / Article
+  description: Application article management
 - name: Public / Subscriber
   description: Application subscriber management
