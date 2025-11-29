@@ -230,10 +230,18 @@ SPECTACULAR_SETTINGS = {
             "name": "Internal / Store",
             "description": "Application store management",
         },
+        {
+            "name": "Internal / Contact Messages",
+            "description": "Application contact message management",
+        },
         # Public API Tags
         {
             "name": "Public / Subscriber",
             "description": "Application subscriber management",
+        },
+        {
+            "name": "Public / Contact Messages",
+            "description": "Application contact message management",
         },
     ],
 }
