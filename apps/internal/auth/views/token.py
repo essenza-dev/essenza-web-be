@@ -28,7 +28,9 @@ class AuthTokenAPIView(BaseApiView):
         """
         Authenticate user credentials and generate JWT tokens
         """
-        result, error = self._auth_service.authenticate(**validated_data)
+        result, error = self._auth_service.use_context(request).authenticate(
+            **validated_data
+        )
         if error:
             return api_response(request).unauthorized(message=str(error))
         return api_response(request).success(

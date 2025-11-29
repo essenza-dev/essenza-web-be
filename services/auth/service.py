@@ -4,9 +4,10 @@ from datetime import datetime, timezone
 from django.db.models import Q
 from django.utils import timezone as django_timezone
 
-from core.service import BaseService
+from core.service import BaseService, required_context
 from core.models import User
 from utils.jwt import JsonWebToken
+from core.enums import ActionType
 
 from . import dto
 
@@ -20,6 +21,7 @@ class AuthService(BaseService):
         token, refresh_token = jwt_handler.encode(str(user.id))
         return token, refresh_token
 
+    @required_context
     def authenticate(
         self, username: str, password: str
     ) -> Tuple[dto.AuthTokensDTO, Exception | None]:
@@ -35,6 +37,15 @@ class AuthService(BaseService):
             # Update last_login with optimized query
             User.objects.filter(id=user.id).update(last_login=django_timezone.now())
             auth_token, refresh_token = self.create_auth_token(user)
+
+            self.ctx.user = user
+            self.ctx.user.is_authenticated = True
+            self.log_activity(
+                self.ctx,
+                action=ActionType.LOGIN,
+                description=f"User {user.username} logged in.",
+            )
+
             return (
                 dto.AuthTokensDTO(access_token=auth_token, refresh_token=refresh_token),
                 None,
