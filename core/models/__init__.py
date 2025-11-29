@@ -12,6 +12,7 @@ from .menu import Menu, MenuItem
 from .social_media import SocialMedia
 from .contact import Subscriber, ContactMessage
 from .user import User
+from .activity_log import ActivityLog
 
 __all__ = [
     'TimeStampedModel',
@@ -30,4 +31,5 @@ __all__ = [
     'Subscriber',
     'ContactMessage',
     'User',
+    'ActivityLog',
 ]
