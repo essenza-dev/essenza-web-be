@@ -10,6 +10,7 @@ from .product import ProductAPI
 from .brochure import BrochureAPI
 from .project import ProjectAPI
 from .article import ArticleAPI
+from .distributor import DistributorAPI
 
 __all__ = [
     "AuthenticationApi",
@@ -24,4 +25,5 @@ __all__ = [
     "BrochureAPI",
     "ProjectAPI",
     "ArticleAPI",
+    "DistributorAPI",
 ]

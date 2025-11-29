@@ -11,7 +11,7 @@ from .product.service import ProductService
 from .brochure.service import BrochureService
 from .project.service import ProjectService
 from .article.service import ArticleService
-from .article.service import ArticleService
+from .distributor.service import DistributorService
 
 __all__ = [
     "AuthService",
@@ -27,4 +27,5 @@ __all__ = [
     "BrochureService",
     "ProjectService",
     "ArticleService",
+    "DistributorService",
 ]
