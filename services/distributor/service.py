@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import Optional, Tuple
 import logging
 
@@ -6,7 +7,8 @@ from django.core.paginator import Page
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
-from core.service import BaseService
+from core.enums import ActionType
+from core.service import BaseService, required_context
 from core.models import Distributor
 
 from . import dto
@@ -18,6 +20,7 @@ logger = logging.getLogger(__name__)
 class DistributorService(BaseService):
     """Service class for managing distributors."""
 
+    @required_context
     def create_distributor(
         self, data: dto.CreateDistributorDTO
     ) -> Tuple[Distributor, Optional[Exception]]:
@@ -26,6 +29,11 @@ class DistributorService(BaseService):
             with transaction.atomic():
                 self._validate_email_uniqueness(data.email)
                 distributor = Distributor.objects.create(**data.to_dict())
+                self.log_entity_change(
+                    self.ctx,
+                    instance=distributor,
+                    action=ActionType.CREATE,
+                )
                 logger.info(
                     f"Distributor created successfully with ID: {distributor.id}"
                 )
@@ -62,6 +70,7 @@ class DistributorService(BaseService):
             logger.error(f"Error retrieving distributor with id '{pk}': {e}")
             return Distributor(), e
 
+    @required_context
     def update_specific_distributor(
         self, pk: int, data: dto.UpdateDistributorDTO
     ) -> Tuple[Distributor, Optional[Exception]]:
@@ -69,8 +78,15 @@ class DistributorService(BaseService):
         try:
             with transaction.atomic():
                 distributor = self._prepare_distributor_for_update(pk, data)
+                old_instance = deepcopy(distributor)
                 self._apply_updates(distributor, data)
                 distributor.save()
+                self.log_entity_change(
+                    self.ctx,
+                    instance=distributor,
+                    old_instance=old_instance,
+                    action=ActionType.UPDATE,
+                )
                 logger.info(
                     f"Distributor with ID: {distributor.id} updated successfully"
                 )
@@ -84,12 +100,18 @@ class DistributorService(BaseService):
             logger.error(f"Error updating distributor with id '{pk}': {e}")
             return Distributor(), e
 
+    @required_context
     def delete_specific_distributor(self, pk: int) -> Optional[Exception]:
         """Delete a specific distributor by ID with atomic transaction."""
         try:
             with transaction.atomic():
                 distributor = self._get_distributor_by_id(pk)
                 distributor.delete()
+                self.log_entity_change(
+                    self.ctx,
+                    instance=distributor,
+                    action=ActionType.DELETE,
+                )
                 logger.info(f"Distributor with ID: {pk} deleted successfully")
                 return None
         except Distributor.DoesNotExist:

@@ -26,9 +26,9 @@ class DistributorViewSet(BaseViewSet):
         self, request: Request, validated_data: Dict[str, Any]
     ) -> Response:
         """Create a new distributor with comprehensive validation."""
-        distributor, error = self._distributor_service.create_distributor(
-            dto.CreateDistributorDTO(**validated_data)
-        )
+        distributor, error = self._distributor_service.use_context(
+            request
+        ).create_distributor(dto.CreateDistributorDTO(**validated_data))
 
         if error:
             return api_response(request).error(message=str(error))
@@ -77,7 +77,9 @@ class DistributorViewSet(BaseViewSet):
         self, request: Request, pk: int, validated_data: Dict[str, Any]
     ) -> Response:
         """Update a specific distributor with partial data support."""
-        distributor, error = self._distributor_service.update_specific_distributor(
+        distributor, error = self._distributor_service.use_context(
+            request
+        ).update_specific_distributor(
             pk=pk, data=dto.UpdateDistributorDTO(**validated_data)
         )
         if error:
@@ -92,7 +94,9 @@ class DistributorViewSet(BaseViewSet):
     @jwt_required
     def delete_specific_distributor(self, request: Request, pk: int) -> Response:
         """Delete a specific distributor with atomic transaction."""
-        error = self._distributor_service.delete_specific_distributor(pk=pk)
+        error = self._distributor_service.use_context(
+            request
+        ).delete_specific_distributor(pk=pk)
         if error:
             return api_response(request).error(message=str(error))
 
