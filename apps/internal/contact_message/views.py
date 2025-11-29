@@ -116,11 +116,9 @@ class ContactMessageViewSet(BaseViewSet):
                 is_read=validated_data.get("is_read", False)
             )
 
-            contact_message, error = (
-                self._contact_message_service.mark_contact_message_as_read(
-                    pk=pk, data=mark_as_read_dto
-                )
-            )
+            contact_message, error = self._contact_message_service.use_context(
+                request
+            ).mark_contact_message_as_read(pk=pk, data=mark_as_read_dto)
             if error:
                 logger.warning(f"Failed to mark contact message as read: {str(error)}")
                 return api_response(request).error(message=str(error))
@@ -146,9 +144,9 @@ class ContactMessageViewSet(BaseViewSet):
         try:
             logger.info(f"Deleting contact message with ID: {pk}")
 
-            if error := self._contact_message_service.delete_specific_contact_message(
-                pk=pk
-            ):
+            if error := self._contact_message_service.use_context(
+                request
+            ).delete_specific_contact_message(pk=pk):
                 logger.warning(f"Failed to delete contact message: {str(error)}")
                 return api_response(request).error(message=str(error))
 
