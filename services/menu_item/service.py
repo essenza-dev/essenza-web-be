@@ -1,9 +1,11 @@
+from copy import deepcopy
 from typing import Tuple
 
 from django.db import transaction
 from django.db.models.manager import BaseManager
 
-from core.service import BaseService
+from core.enums import ActionType
+from core.service import BaseService, required_context
 from core.models import MenuItem, Menu
 
 from . import dto
@@ -12,6 +14,7 @@ from . import dto
 class MenuItemService(BaseService):
     """Service class for managing menu items."""
 
+    @required_context
     def create_menu_item(
         self, data: dto.CreateMenuItemDTO
     ) -> Tuple[MenuItem, Exception | None]:
@@ -29,6 +32,13 @@ class MenuItemService(BaseService):
                 link=data.link,
                 parent=parent_item,
                 order_no=data.order_no,
+            )
+
+            self.log_entity_change(
+                self.ctx,
+                instance=menu_item,
+                action=ActionType.CREATE,
+                include_relations=True
             )
 
             return menu_item, None
@@ -58,14 +68,22 @@ class MenuItemService(BaseService):
             return MenuItem(), e
 
     @transaction.atomic
+    @required_context
     def update_specific_menu_item(
         self, pk: int, data: dto.UpdateMenuItemDTO
     ) -> Tuple[MenuItem, Exception | None]:
         """Update a specific menu item by its ID."""
         try:
             menu_item = MenuItem.objects.get(id=pk)
+            old_instance = deepcopy(menu_item)
             self._update_menu_item_fields(menu_item, data)
             menu_item.save()
+            self.log_entity_change(
+                self.ctx,
+                instance=menu_item,
+                old_instance=old_instance,
+                action=ActionType.UPDATE,
+            )
             return menu_item, None
         except MenuItem.DoesNotExist:
             return MenuItem(), Exception(f"MenuItem with id '{pk}' does not exist.")
@@ -76,11 +94,18 @@ class MenuItemService(BaseService):
         except Exception as e:
             return MenuItem(), e
 
+    @required_context
     def delete_specific_menu_item(self, pk: int) -> Exception | None:
         """Delete a specific menu item by its ID."""
         try:
             menu_item = MenuItem.objects.get(id=pk)
+            old_instance = deepcopy(menu_item)
             menu_item.delete()
+            self.log_entity_change(
+                self.ctx,
+                instance=old_instance,
+                action=ActionType.DELETE,
+            )
             return None
         except MenuItem.DoesNotExist:
             return Exception(f"MenuItem with id '{pk}' does not exist.")

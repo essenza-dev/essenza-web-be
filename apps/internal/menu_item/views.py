@@ -21,7 +21,7 @@ class MenuItemViewSet(BaseViewSet):
     @validate_body(serializers.PostCreateMenuItemRequest)
     def create_menu_item(self, request: Request, validated_data) -> Response:
         """Create a new menu item."""
-        result, error = self._menu_item_service.create_menu_item(
+        result, error = self._menu_item_service.use_context(request).create_menu_item(
             CreateMenuItemDTO(**validated_data)
         )
         print("result, error", result.id, error)
@@ -63,9 +63,9 @@ class MenuItemViewSet(BaseViewSet):
         self, request: Request, pk: int, validated_data
     ) -> Response:
         """Update a specific menu item by its ID."""
-        menu_item, error = self._menu_item_service.update_specific_menu_item(
-            pk, UpdateMenuItemDTO(**validated_data)
-        )
+        menu_item, error = self._menu_item_service.use_context(
+            request
+        ).update_specific_menu_item(pk, UpdateMenuItemDTO(**validated_data))
         if error:
             return api_response(request).error(message=str(error))
 
@@ -78,7 +78,9 @@ class MenuItemViewSet(BaseViewSet):
     @jwt_required
     def delete_specific_menu_item(self, request: Request, pk: int) -> Response:
         """Delete a specific menu item by its ID."""
-        error = self._menu_item_service.delete_specific_menu_item(pk)
+        error = self._menu_item_service.use_context(request).delete_specific_menu_item(
+            pk
+        )
         if error:
             return api_response(request).error(message=str(error))
 
