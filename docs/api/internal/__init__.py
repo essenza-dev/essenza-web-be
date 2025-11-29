@@ -11,6 +11,7 @@ from .brochure import BrochureAPI
 from .project import ProjectAPI
 from .article import ArticleAPI
 from .distributor import DistributorAPI
+from .store import StoreAPI
 
 __all__ = [
     "AuthenticationApi",
@@ -26,4 +27,5 @@ __all__ = [
     "ProjectAPI",
     "ArticleAPI",
     "DistributorAPI",
+    "StoreAPI",
 ]

@@ -226,6 +226,10 @@ SPECTACULAR_SETTINGS = {
             "name": "Internal / Distributor",
             "description": "Application distributor management",
         },
+        {
+            "name": "Internal / Store",
+            "description": "Application store management",
+        },
         # Public API Tags
         {
             "name": "Public / Subscriber",
