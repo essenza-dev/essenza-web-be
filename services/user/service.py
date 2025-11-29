@@ -1,9 +1,9 @@
-import copy
 from typing import Dict, Tuple
 
 from core.enums import ActionType
 from core.service import BaseService, required_context
 from core.models import User
+from utils.log.activity_log import ActivityLogParams
 
 from . import dto
 
@@ -42,11 +42,14 @@ class UserService(BaseService):
         if fields_to_update:
             User.objects.filter(id=user.id).update(**fields_to_update)
             user.refresh_from_db(fields=list(fields_to_update.keys()))
-            self.log_activity(
-                self.ctx,
-                action=ActionType.UPDATE,
+            params = ActivityLogParams(
+                entity=user._entity,
+                computed_entity=user._computed_entity,
+                entity_id=user.id,
+                entity_name=user.username,
                 description=f"User {user.username} updated their profile.",
             )
+            self.log_activity(ActionType.UPDATE, params)
 
         return user, None
 
@@ -63,10 +66,13 @@ class UserService(BaseService):
         # Set new password
         user.set_password(data.new_password)
         user.save(update_fields=["password"])
-        self.log_activity(
-            self.ctx,
-            action=ActionType.UPDATE,
+        params = ActivityLogParams(
+            entity=user._entity,
+            computed_entity=user._computed_entity,
+            entity_id=user.id,
+            entity_name=user.username,
             description=f"User {user.username} changed their password.",
         )
+        self.log_activity(ActionType.UPDATE, params)
 
         return None

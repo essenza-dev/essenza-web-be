@@ -217,10 +217,13 @@ class BaseModel(models.Model):
             # ... modify product ...
             old_vals, new_vals, changed = Product.get_changed_fields(old_product, product)
         """
-        exclude_fields = exclude_fields or []
-        exclude_fields.extend(
-            ["updated_at", "modified_at"]
-        )  # Always exclude auto-update fields
+        # Initialize exclude_fields with default auto-update fields
+        if exclude_fields is None:
+            exclude_fields = []
+
+        # Add auto-update fields to exclusion list to avoid noise in change detection
+        auto_update_fields = ["updated_at", "modified_at"]
+        exclude_fields = exclude_fields + auto_update_fields
 
         old_data = old_instance.to_dict(
             exclude_fields=exclude_fields, mask_sensitive=mask_sensitive

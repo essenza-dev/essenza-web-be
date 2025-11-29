@@ -54,14 +54,12 @@ class ActivityLog(BaseModel):
     )
     actor_identifier = models.CharField(
         max_length=255,
-        null=True,
         blank=True,
         db_index=True,
         help_text="Unique identifier: email, phone, session_id, or IP address",
     )
     actor_name = models.CharField(
         max_length=255,
-        null=True,
         blank=True,
         help_text="Human-readable actor name for UI display",
     )
@@ -96,7 +94,6 @@ class ActivityLog(BaseModel):
     )
     entity_name = models.CharField(
         max_length=255,
-        null=True,
         blank=True,
         help_text="Human-readable entity identifier for UI display",
     )
@@ -118,7 +115,6 @@ class ActivityLog(BaseModel):
 
     # Context Metadata
     description = models.TextField(
-        null=True,
         blank=True,
         help_text="Human-readable activity description for audit trails",
     )
@@ -126,7 +122,7 @@ class ActivityLog(BaseModel):
         null=True, blank=True, help_text="Source IP address of the actor"
     )
     user_agent = models.TextField(
-        null=True, blank=True, help_text="Browser and device information string"
+        blank=True, help_text="Browser and device information string"
     )
     extra_data = models.JSONField(
         null=True,
@@ -177,13 +173,13 @@ class ActivityLog(BaseModel):
             return (
                 getattr(user, "name", None) or user.username if user else "Deleted User"
             )
-        return self.actor_name or "Anonymous"
+        return self.actor_name.strip() if self.actor_name else "Anonymous"
 
     def get_actor_display_identifier(self) -> Optional[str]:
         """Retrieve primary identifier for the activity actor."""
         if self.actor_type == ActorType.USER and self.user:
             return self.user.email
-        return self.actor_identifier
+        return self.actor_identifier.strip() if self.actor_identifier else None
 
     @property
     def is_user_activity(self) -> bool:
@@ -209,7 +205,7 @@ class ActivityLog(BaseModel):
             return self.actor_metadata["email"]
 
         # Fallback: validate identifier as email
-        identifier = self.actor_identifier
+        identifier = self.actor_identifier.strip() if self.actor_identifier else None
         return identifier if identifier and "@" in identifier else None
 
     def get_guest_phone(self) -> Optional[str]:
@@ -227,7 +223,7 @@ class ActivityLog(BaseModel):
             return self.actor_metadata["session_id"]
 
         # Fallback: validate identifier as session ID
-        identifier = self.actor_identifier
+        identifier = self.actor_identifier.strip() if self.actor_identifier else None
         return identifier if identifier and identifier.startswith("sess_") else None
 
     def get_target_instance(self) -> Optional[models.Model]:

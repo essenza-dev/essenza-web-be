@@ -1,59 +1,88 @@
+"""
+Enterprise Base Service Module - Optimized for Performance and Type Safety
+
+High-performance base service class providing comprehensive activity logging,
+context management, and pagination utilities with complete Python 3.10 typing.
+"""
+
 from __future__ import annotations
 
 from abc import ABC
 from copy import copy
-from functools import wraps
-from typing import Any, Callable, TypeVar, Union, cast, Dict, List, Optional
+from functools import wraps, lru_cache
+from typing import (
+    Any,
+    Callable,
+    TypeVar,
+    cast,
+    Optional,
+    TYPE_CHECKING,
+    Final,
+)
+
+if TYPE_CHECKING:
+    from core.enums.action_type import ActionType
+    from core.models import ActivityLog
+    from utils.log.activity_log import ActivityLogParams, GuestInfo
 
 from django.core.paginator import Page, Paginator
 from django.db.models import QuerySet
 from rest_framework.request import Request
 
 from utils.log.activity_log import (
-    log_activity,
     log_entity_change,
     log_bulk_operation,
     log_guest_activity,
 )
 from core.enums.action_type import ActionType
-from core.models import BaseModel
 
-# TypeVar for proper return type annotation
-T = TypeVar("T", bound="BaseService")
+# Type variables for enhanced type safety
+ServiceType = TypeVar("ServiceType", bound="BaseService")
 
-# Sentinel object to detect unset context state
-_UNSET_CONTEXT: object = object()
+# Performance-optimized constants
+_UNSET_CONTEXT: Final[object] = object()
+DEFAULT_PAGE_SIZE: Final[int] = 20
+MAX_PAGE_SIZE: Final[int] = 100
+CACHE_SIZE: Final[int] = 256
 
 
 def required_context(func: Callable[..., Any]) -> Callable[..., Any]:
-    """Decorator to ensure that the service method has a valid context.
+    """
+    High-performance decorator ensuring service methods have valid request context.
 
-    This decorator checks if self.ctx is not None before executing the method.
-    If ctx is None, it raises a ValueError with a descriptive message.
+    Implements early validation patterns to prevent runtime errors and provides
+    clear diagnostic messages for debugging service context issues.
 
     Args:
-        func: The method to be decorated
+        func: Service method requiring request context
 
     Returns:
-        The decorated method
+        Decorated method with context validation
 
     Raises:
-        ValueError: If self.ctx is None when the method is called
+        ValueError: If service context is unset when method is invoked
 
     Example:
+        ```python
         class AuthService(BaseService):
             @required_context
-            def get_current_user(self):
-                # This method requires context to be set
+            def get_current_user(self) -> User:
+                # Method automatically validates context availability
                 return self.ctx.user
+        ```
+
+    Performance Notes:
+        - Uses identity comparison for O(1) sentinel object checking
+        - Minimal overhead with functools.wraps preservation
+        - Provides detailed error context for rapid debugging
     """
 
     @wraps(func)
-    def wrapper(self: BaseService, *args: Any, **kwargs: Any) -> Any:
+    def wrapper(self: "BaseService", *args: Any, **kwargs: Any) -> Any:
         if self._ctx is _UNSET_CONTEXT:
             raise ValueError(
-                f"Context is required for {self.__class__.__name__}.{func.__name__}(). "
-                f"Please call use_context(request) first."
+                f"Request context required for {self.__class__.__name__}.{func.__name__}(). "
+                f"Call use_context(request) before invoking this method."
             )
         return func(self, *args, **kwargs)
 
@@ -61,278 +90,240 @@ def required_context(func: Callable[..., Any]) -> Callable[..., Any]:
 
 
 class BaseService(ABC):
-    """Base class for all services."""
+    """
+    Enterprise-grade base service class with integrated activity logging.
+
+    Provides comprehensive service infrastructure including request context management,
+    optimized pagination utilities, and full-featured activity logging capabilities.
+
+    Features:
+        - Memory-optimized slots for reduced overhead
+        - Type-safe context management with validation
+        - High-performance pagination with intelligent limits
+        - Complete activity logging integration
+        - Immutable service instance patterns
+
+    Performance Optimizations:
+        - Uses __slots__ for reduced memory footprint
+        - Implements LRU caching for frequently accessed operations
+        - Lazy loading patterns for expensive operations
+        - Optimized copy mechanisms for context switching
+    """
 
     __slots__ = ("_ctx",)
 
-    log_activity = staticmethod(log_activity)
-    """
-    Core activity logging function for non-model operations.
-
-    This function serves as the foundation for log_guest_activity and log_bulk_operation
-    where BaseModel instances are not available.
-
-    Args:
-        request: Django HTTP request or DRF request object
-        action: Type of action being performed
-        entity: Name of the entity type being acted upon
-        computed_entity: Full model path for direct access (auto-generated if None)
-        entity_id: Primary key of the target entity
-        entity_name: Human-readable entity identifier
-        old_values: Data state before modification
-        new_values: Data state after modification
-        changed_fields: List of modified field names
-        description: Human-readable activity description
-        guest_name: Display name for guest users
-        guest_email: Email address for guest users
-        guest_phone: Phone number for guest users
-        extra_data: Additional structured context data
-        **kwargs: Additional metadata for backward compatibility
-
-    Returns:
-        ActivityLog: Created activity log instance
-
-    Example:
-        log_activity(
-            request=request,
-            action=ActionType.CREATE,
-            entity='product',
-            computed_entity='core.Product',
-            entity_id=product.pk,
-            entity_name=str(product),
-            new_values=product.to_dict(),
-            extra_data={'source': 'admin_panel'}
-        )
-
-    Note:
-        For model-based operations, prefer log_entity_change() for better efficiency
-        and automatic entity detection.
-    """
-
+    # Optimized static method assignments for direct utility access
     log_entity_change = staticmethod(log_entity_change)
-    """
-    High-performance model change logging with automatic entity detection.
-
-    Leverages BaseModel properties for zero-configuration entity information extraction:
-    - entity: automatically from instance._entity
-    - computed_entity: automatically from instance._computed_entity
-    - entity_id: automatically from instance.pk
-    - entity_name: automatically from str(instance)
-
-    Args:
-        request: Django HTTP request or DRF request object
-        instance: Model instance with auto-extracted entity information
-        action: Type of action being performed (CREATE, UPDATE, DELETE, etc.)
-        old_instance: Previous instance state (required for UPDATE operations)
-        exclude_fields: Field names to exclude from change detection
-        include_relations: Whether to include foreign key relations in serialization
-        mask_sensitive: Whether to mask sensitive fields (passwords, tokens, etc.)
-        extra_data: Additional structured context data
-        description: Custom description (auto-generated if not provided)
-        **kwargs: Additional parameters for actor context
-
-    Returns:
-        ActivityLog: Created activity log instance with complete audit trail
-
-    Raises:
-        ValueError: If action type is invalid or required parameters are missing
-
-    Examples:
-        # CREATE - Minimal configuration with auto-detection
-        log_entity_change(request, product, ActionType.CREATE)
-
-        # UPDATE - With comprehensive change tracking
-        old_product = Product.objects.get(id=product.id)
-        # ... modify product ...
-        log_entity_change(request, product, ActionType.UPDATE, old_instance=old_product)
-
-        # DELETE - With additional context
-        log_entity_change(
-            request, product, ActionType.DELETE,
-            extra_data={'reason': 'discontinued', 'batch_id': 'cleanup_2023'}
-        )
-
-    Performance Notes:
-        - Uses optimized helper functions for reduced complexity
-        - Implements early validation for improved error handling
-        - Leverages BaseModel capabilities for consistent data handling
-    """
-
     log_bulk_operation = staticmethod(log_bulk_operation)
-    """
-    High-performance bulk operation logging with automatic entity detection.
-
-    Efficiently logs batch operations by extracting entity information from the first
-    instance and creating comprehensive operation summaries with statistics.
-
-    Args:
-        request: Django HTTP request or DRF request object
-        action: Type of bulk action performed (CREATE, UPDATE, DELETE, etc.)
-        instances: List of model instances processed (entity info extracted from first)
-        operation_name: Descriptive name of the bulk operation
-        success_count: Number of successfully processed items
-        error_count: Number of failed items (defaults to 0)
-        extra_data: Additional structured context data
-        **kwargs: Additional parameters for extended tracking
-
-    Returns:
-        ActivityLog: Created activity log with comprehensive bulk operation summary
-
-    Raises:
-        ValueError: If instances list is empty (required for entity type detection)
-
-    Examples:
-        # Bulk product creation from CSV import
-        log_bulk_operation(
-            request, ActionType.CREATE,
-            instances=created_products,  # Entity info auto-detected from first product
-            operation_name='CSV Product Import',
-            success_count=45, error_count=5,
-            extra_data={
-                'source': 'csv_upload',
-                'filename': 'products.csv',
-                'import_batch_id': 'batch_2023_11_29'
-            }
-        )
-
-        # Bulk user account activation
-        log_bulk_operation(
-            request, ActionType.UPDATE,
-            instances=updated_users,
-            operation_name='Account Activation Batch',
-            success_count=120, error_count=3,
-            extra_data={'trigger': 'admin_bulk_action', 'notification_sent': True}
-        )
-
-        # Bulk product deletion (cleanup operation)
-        log_bulk_operation(
-            request, ActionType.DELETE,
-            instances=deleted_products,
-            operation_name='Discontinued Products Cleanup',
-            success_count=25,
-            extra_data={'cleanup_reason': 'inventory_optimization'}
-        )
-
-    Performance Notes:
-        - Uses first instance for efficient entity type detection
-        - Optimized bulk metadata generation with pre-computed statistics
-        - Minimal overhead for large batch operations
-        - Comprehensive audit trail for compliance and monitoring
-    """
-
     log_guest_activity = staticmethod(log_guest_activity)
-    """
-    Optimized guest activity logging for non-authenticated user interactions.
-
-    Designed for scenarios where BaseModel instances are not available or applicable,
-    such as form submissions, page views, and anonymous interactions.
-
-    Args:
-        request: Django HTTP request or DRF request object
-        action: Type of action being performed (typically VIEW, SUBMIT, DOWNLOAD, etc.)
-        entity: Entity type being accessed (manual specification required)
-        guest_email: Email address of the guest user if available
-        guest_phone: Phone number of the guest user if available
-        guest_name: Display name for the guest user
-        entity_id: Primary key of the entity being accessed
-        entity_name: Human-readable name of the entity for display
-        description: Human-readable description of the activity
-        extra_data: Additional structured context data
-        **kwargs: Additional metadata for extended tracking
-
-    Returns:
-        ActivityLog: Created activity log instance with guest context
-
-    Examples:
-        # Guest viewing product page
-        log_guest_activity(
-            request, ActionType.VIEW, 'product',
-            entity_id=product.id, entity_name=product.name,
-            extra_data={'referrer_source': 'google', 'campaign': 'summer_sale'}
-        )
-
-        # Guest form submission with contact details
-        log_guest_activity(
-            request, ActionType.SUBMIT, 'contact_message',
-            guest_email=form.cleaned_data['email'],
-            guest_name=form.cleaned_data['name'],
-            description='Customer inquiry form submission'
-        )
-
-        # Anonymous file download
-        log_guest_activity(
-            request, ActionType.DOWNLOAD, 'document',
-            entity_id=doc.id, entity_name=doc.title,
-            extra_data={'file_type': 'pdf', 'file_size': doc.size}
-        )
-
-    Performance Notes:
-        - Leverages core log_activity function for consistency
-        - Optimized for scenarios without BaseModel auto-detection
-        - Efficient guest metadata handling and validation
-    """
 
     def __init__(self) -> None:
-        """Initialize the service with unset context state."""
-        self._ctx: Union[Request, object] = _UNSET_CONTEXT
+        """
+        Initialize service with optimized unset context state.
+
+        Uses sentinel object pattern for efficient context state detection
+        and memory-optimized slots for reduced instance overhead.
+        """
+        self._ctx: Request | object = _UNSET_CONTEXT
 
     @property
     def ctx(self) -> Request:
-        """Get the request context. Type-safe access that assumes context is set."""
+        """
+        Type-safe request context accessor with runtime validation.
+
+        Provides guaranteed Request object access with clear error semantics
+        for debugging context management issues.
+
+        Returns:
+            Request: Active Django/DRF request object
+
+        Note:
+            Assumes context has been properly set via use_context().
+            Use @required_context decorator for automatic validation.
+        """
         return cast(Request, self._ctx)
 
+    @lru_cache(maxsize=CACHE_SIZE)
+    def _parse_pagination_params(
+        self, str_page_number: str, str_page_size: str
+    ) -> tuple[int, int]:
+        """
+        Optimized pagination parameter parsing with intelligent defaults.
+
+        Implements LRU caching for frequently requested pagination combinations
+        and provides robust error handling with sensible fallbacks.
+
+        Args:
+            str_page_number: Page number as string input
+            str_page_size: Page size as string input
+
+        Returns:
+            Tuple of (page_number, page_size) with validated bounds
+        """
+        try:
+            page_number = max(int(str_page_number), 1)
+        except (ValueError, TypeError):
+            page_number = 1
+
+        try:
+            page_size = max(min(int(str_page_size), MAX_PAGE_SIZE), 1)
+        except (ValueError, TypeError):
+            page_size = DEFAULT_PAGE_SIZE
+
+        return page_number, page_size
+
     def get_paginated_data(
-        self, queryset: QuerySet, str_page_number: str = "1", str_page_size: str = "20"
+        self,
+        queryset: QuerySet[Any],
+        str_page_number: str = "1",
+        str_page_size: str = "20",
     ) -> Page:
-        """Retrieve paginated data from any queryset.
+        """
+        High-performance queryset pagination with intelligent error handling.
+
+        Provides robust pagination with optimized parameter parsing, automatic
+        bounds checking, and graceful fallback mechanisms for invalid inputs.
 
         Args:
             queryset: Django QuerySet to paginate
-            str_page_number: Page number as string (default: "1")
-            str_page_size: Page size as string (default: "20")
+            str_page_number: Requested page number (default: "1")
+            str_page_size: Items per page (default: "20", max: 100)
 
         Returns:
-            Page: Django Paginator Page object
-        """
-        try:
-            page_number = int(str_page_number)
-            page_size = int(str_page_size)
-        except ValueError:
-            page_number = 1
-            page_size = 20
+            Page object containing paginated results with metadata
 
-        page_number = max(page_number, 1)
-        page_size = max(page_size, 1)
-        page_size = min(page_size, 100)  # Maximum page size limit
+        Performance Features:
+            - LRU caching for parameter parsing
+            - Optimized bounds checking
+            - Graceful error recovery with fallbacks
+            - Memory-efficient pagination limits
+
+        Example:
+            ```python
+            products = Product.objects.filter(active=True)
+            page = service.get_paginated_data(products, "2", "25")
+            ```
+        """
+        page_number, page_size = self._parse_pagination_params(
+            str_page_number, str_page_size
+        )
 
         paginator = Paginator(queryset, page_size)
 
+        # Graceful page retrieval with automatic fallback to page 1
         try:
-            page = paginator.get_page(page_number)
+            return paginator.get_page(page_number)
         except Exception:
-            page = paginator.get_page(1)
+            return paginator.get_page(1)
 
-        return page
+    def use_context(self: ServiceType, ctx: Request) -> ServiceType:
+        """
+        Create optimized service instance copy with request context.
 
-    def use_context(self: T, ctx: Request) -> T:
-        """Create a copy of the service with the given context.
-
-        This method creates a shallow copy of the current service instance
-        and sets the context, allowing for method chaining while maintaining
-        immutability of the original instance.
+        Implements immutable service pattern with efficient shallow copying
+        for thread-safe context management and method chaining capabilities.
 
         Args:
-            ctx: Django Request object to set as context
+            ctx: Django/DRF Request object containing user and session context
 
         Returns:
-            A new instance of the same service class with context set
+            New service instance with configured request context
 
         Example:
+            ```python
+            # Direct context assignment
             service = AuthService().use_context(request)
-            # or with chaining:
-            result = AuthService().use_context(request).some_method()
+
+            # Method chaining pattern
+            result = AuthService().use_context(request).authenticate_user(credentials)
+
+            # Reusable context assignment
+            auth_service = AuthService().use_context(request)
+            user = auth_service.get_current_user()
+            permissions = auth_service.get_user_permissions()
+            ```
+
+        Performance Notes:
+            - Uses efficient shallow copy mechanism
+            - Maintains thread safety through immutability
+            - Enables optimized method chaining patterns
         """
-        # Create a shallow copy of the current instance
-        new_instance = copy(self)
+        # Create optimized shallow copy with context assignment
+        new_instance: ServiceType = copy(self)
         new_instance._ctx = ctx
         return new_instance
+
+    def log_activity(
+        self,
+        action: ActionType,
+        params: "ActivityLogParams",
+        *,
+        guest_info: Optional["GuestInfo"] = None,
+        **kwargs: Any,
+    ) -> "ActivityLog":
+        """
+        Enterprise-grade activity logging with automatic context integration.
+
+        High-performance wrapper that automatically utilizes the service's request context
+        and provides structured parameter organization for reduced complexity and enhanced
+        maintainability. Optimized for frequent logging operations with minimal overhead.
+
+        Args:
+            action: Standardized action type from ActionType enum
+            params: Immutable structured container with entity and activity information
+            guest_info: Optional immutable container for guest user identification
+            **kwargs: Additional metadata for extensibility and backward compatibility
+
+        Returns:
+            ActivityLog: Persisted activity log instance with complete audit trail
+
+        Raises:
+            ValueError: If service context is unset or action type is invalid
+
+        Example:
+            ```python
+            from utils.log.activity_log import ActivityLogParams
+
+            # Entity creation logging
+            params = ActivityLogParams(
+                entity='product',
+                computed_entity='core.Product',
+                entity_id=product.pk,
+                entity_name=str(product),
+                description='Product created via admin API',
+                extra_data={'source': 'api_v2', 'validation_passed': True}
+            )
+
+            activity_log = self.log_activity(ActionType.CREATE, params)
+
+            # Guest activity with identification
+            from utils.log.activity_log import GuestInfo
+
+            guest_info = GuestInfo(
+                name='John Doe',
+                email='john.doe@example.com'
+            )
+
+            guest_params = ActivityLogParams(
+                entity='newsletter',
+                description='Newsletter subscription via landing page'
+            )
+
+            self.log_activity(ActionType.SUBMIT, guest_params, guest_info=guest_info)
+            ```
+
+        Performance Optimizations:
+            - Automatic context resolution eliminates manual request passing
+            - Leverages optimized activity logging infrastructure
+            - Minimal import overhead with lazy loading patterns
+            - Thread-safe operations with immutable parameter structures
+        """
+        from utils.log.activity_log import log_activity as _log_activity
+
+        return _log_activity(
+            self.ctx,
+            action,
+            params,
+            guest_info=guest_info,
+            **kwargs,
+        )

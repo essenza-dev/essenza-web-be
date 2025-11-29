@@ -8,6 +8,7 @@ from core.service import BaseService, required_context
 from core.models import User
 from utils.jwt import JsonWebToken
 from core.enums import ActionType
+from utils.log.activity_log import ActivityLogParams
 
 from . import dto
 
@@ -40,11 +41,14 @@ class AuthService(BaseService):
 
             self.ctx.user = user
             self.ctx.user.is_authenticated = True
-            self.log_activity(
-                self.ctx,
-                action=ActionType.LOGIN,
+            params = ActivityLogParams(
+                entity=user._entity,
+                computed_entity=user._computed_entity,
+                entity_id=user.id,
+                entity_name=user.username,
                 description=f"User {user.username} logged in.",
             )
+            self.use_context(self.ctx).log_activity(ActionType.LOGIN, params)
 
             return (
                 dto.AuthTokensDTO(access_token=auth_token, refresh_token=refresh_token),
