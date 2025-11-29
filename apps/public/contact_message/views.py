@@ -44,11 +44,9 @@ class ContactMessagePublicViewSet(BaseViewSet):
                 phone=validated_data.get("phone", "") or None,
             )
 
-            contact_message, error = (
-                self._contact_message_service.create_contact_message(
-                    data=create_contact_message_dto
-                )
-            )
+            contact_message, error = self._contact_message_service.use_context(
+                request
+            ).create_contact_message(data=create_contact_message_dto)
             if error:
                 logger.warning(f"Failed to create contact message: {str(error)}")
                 return api_response(request).error(message=str(error))
