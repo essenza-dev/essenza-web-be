@@ -21,7 +21,7 @@ class BannerViewSet(BaseViewSet):
     @validate_body(serializers.PostCreateBannerRequest)
     def create_banner(self, request: Request, validated_data) -> Response:
         """Create a new banner."""
-        banner, error = self._banner_service.create_banner(
+        banner, error = self._banner_service.use_context(request).create_banner(
             dto.CreateBannerDTO(**validated_data)
         )
 
@@ -70,9 +70,9 @@ class BannerViewSet(BaseViewSet):
         self, request: Request, pk: int, validated_data
     ) -> Response:
         """Update a specific banner by its ID."""
-        banner, error = self._banner_service.update_specific_banner(
-            pk=pk, data=dto.UpdateBannerDTO(**validated_data)
-        )
+        banner, error = self._banner_service.use_context(
+            request
+        ).update_specific_banner(pk=pk, data=dto.UpdateBannerDTO(**validated_data))
         if error:
             return api_response(request).error(message=str(error))
 
@@ -85,7 +85,7 @@ class BannerViewSet(BaseViewSet):
     @jwt_required
     def delete_specific_banner(self, request: Request, pk: int) -> Response:
         """Delete a specific banner by its ID."""
-        error = self._banner_service.delete_specific_banner(pk=pk)
+        error = self._banner_service.use_context(request).delete_specific_banner(pk=pk)
         if error:
             return api_response(request).error(message=str(error))
 
