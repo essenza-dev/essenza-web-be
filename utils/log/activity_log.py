@@ -282,14 +282,14 @@ def _handle_update_action(
         return ActivityLog.create_for_instance(
             instance=instance,
             action=ActionType.VIEW,
-            description=f"No changes detected for {instance._entity}: {instance}",
+            description=f"No changes detected for {old_instance._entity}: {old_instance}",
             **actor_info,
             **base_params,
         )
 
     # Generate enhanced description with change statistics
     enhanced_description = (
-        f"Updated {instance._entity}: {instance} ({len(changed_fields)} fields changed)"
+        f"Updated {old_instance._entity}: {old_instance} ({len(changed_fields)} fields changed)"
         if "Updated" not in description
         else description
     )
