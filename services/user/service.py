@@ -1,6 +1,8 @@
+import copy
 from typing import Dict, Tuple
 
-from core.service import BaseService
+from core.enums import ActionType
+from core.service import BaseService, required_context
 from core.models import User
 
 from . import dto
@@ -9,6 +11,7 @@ from . import dto
 class UserService(BaseService):
     """Service class for user-related operations."""
 
+    @required_context
     def update_user_profile(
         self, data: dto.UpdateProfileDTO
     ) -> Tuple[User, Exception | None]:
@@ -39,9 +42,15 @@ class UserService(BaseService):
         if fields_to_update:
             User.objects.filter(id=user.id).update(**fields_to_update)
             user.refresh_from_db(fields=list(fields_to_update.keys()))
+            self.log_activity(
+                self.ctx,
+                action=ActionType.UPDATE,
+                description=f"User {user.username} updated their profile.",
+            )
 
         return user, None
 
+    @required_context
     def update_user_password(
         self, user: User, data: dto.UpdatePasswordDTO
     ) -> Exception | None:
@@ -54,5 +63,10 @@ class UserService(BaseService):
         # Set new password
         user.set_password(data.new_password)
         user.save(update_fields=["password"])
+        self.log_activity(
+            self.ctx,
+            action=ActionType.UPDATE,
+            description=f"User {user.username} changed their password.",
+        )
 
         return None

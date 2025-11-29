@@ -45,7 +45,7 @@ class AuthUserViewSet(BaseViewSet):
         """
         Update the authenticated user's profile information
         """
-        user, error = self._user_service.update_user_profile(
+        user, error = self._user_service.use_context(request).update_user_profile(
             data=UpdateProfileDTO(user=request.user, **validated_data)
         )
         if error:
@@ -66,7 +66,7 @@ class AuthUserViewSet(BaseViewSet):
         Change the authenticated user's password and regenerate tokens
         """
         user = request.user
-        if error := self._user_service.update_user_password(
+        if error := self._user_service.use_context(request).update_user_password(
             user=user,
             data=UpdatePasswordDTO(**validated_data),
         ):
