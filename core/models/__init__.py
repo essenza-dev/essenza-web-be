@@ -1,4 +1,4 @@
-from ._base import TimeStampedModel
+from ._base import TimeStampedModel, BaseModel
 from .setting import Setting
 from .banner import Banner
 from .page import Page
@@ -16,6 +16,7 @@ from .activity_log import ActivityLog
 
 __all__ = [
     'TimeStampedModel',
+    'BaseModel',
     'Setting',
     'Banner',
     'Page',
