@@ -26,7 +26,7 @@ class BrochureViewSet(BaseViewSet):
     @validate_body(serializers.PostCreateBrochureRequest)
     def create_brochure(self, request: Request, validated_data) -> Response:
         """Create a new brochure."""
-        brochure, error = self._brochure_service.create_brochure(
+        brochure, error = self._brochure_service.use_context(request).create_brochure(
             dto.CreateBrochureDTO(**validated_data)
         )
 
@@ -82,9 +82,9 @@ class BrochureViewSet(BaseViewSet):
         self, request: Request, pk: int, validated_data
     ) -> Response:
         """Update a specific brochure by its ID."""
-        brochure, error = self._brochure_service.update_specific_brochure(
-            pk=pk, data=dto.UpdateBrochureDTO(**validated_data)
-        )
+        brochure, error = self._brochure_service.use_context(
+            request
+        ).update_specific_brochure(pk=pk, data=dto.UpdateBrochureDTO(**validated_data))
         if error:
             return api_response(request).error(message=str(error))
 
@@ -97,7 +97,9 @@ class BrochureViewSet(BaseViewSet):
     @jwt_required
     def delete_specific_brochure(self, request: Request, pk: int) -> Response:
         """Delete a specific brochure by its ID."""
-        error = self._brochure_service.delete_specific_brochure(pk=pk)
+        error = self._brochure_service.use_context(request).delete_specific_brochure(
+            pk=pk
+        )
         if error:
             return api_response(request).error(message=str(error))
 
@@ -112,9 +114,9 @@ class BrochureViewSet(BaseViewSet):
         self, request: Request, pk: int, validated_data
     ) -> Response:
         """Upload a file for a specific brochure."""
-        brochure, error = self._brochure_service.upload_brochure_file(
-            pk=pk, data=dto.UploadBrochureFileDTO(**validated_data)
-        )
+        brochure, error = self._brochure_service.use_context(
+            request
+        ).upload_brochure_file(pk=pk, data=dto.UploadBrochureFileDTO(**validated_data))
         if error:
             return api_response(request).error(message=str(error))
 

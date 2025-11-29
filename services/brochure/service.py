@@ -5,6 +5,7 @@ Handles all business logic for brochure management operations.
 
 import logging
 import os
+import copy
 from typing import Tuple, Optional
 from django.db.models.query import QuerySet
 from django.db.models import Q
@@ -12,7 +13,8 @@ from django.core.paginator import Page
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files.storage import default_storage
 
-from core.service import BaseService
+from core.enums.action_type import ActionType
+from core.service import BaseService, required_context
 from core.models import Brochure
 from . import dto
 
@@ -78,6 +80,7 @@ class BrochureService(BaseService):
             queryset = queryset.exclude(id=exclude_id)
         return not queryset.exists()
 
+    @required_context
     def create_brochure(
         self, data: dto.CreateBrochureDTO
     ) -> Tuple[Brochure, Optional[Exception]]:
@@ -105,6 +108,14 @@ class BrochureService(BaseService):
 
             brochure_data = data.to_dict()
             brochure = Brochure.objects.create(**brochure_data)
+
+            self.log_entity_change(
+                self.ctx,
+                instance=brochure,
+                old_instance=None,
+                action=ActionType.CREATE,
+                description="Brochure created",
+            )
 
             logger.info(f"Brochure created successfully with id {brochure.id}")
             return brochure, None
@@ -175,6 +186,7 @@ class BrochureService(BaseService):
             logger.error(f"Error retrieving brochure {pk}: {str(e)}", exc_info=True)
             return Brochure(), e
 
+    @required_context
     def update_specific_brochure(
         self, pk: int, data: dto.UpdateBrochureDTO
     ) -> Tuple[Brochure, Optional[Exception]]:
@@ -196,6 +208,7 @@ class BrochureService(BaseService):
             logger.error(f"Error updating brochure {pk}: {str(e)}", exc_info=True)
             return Brochure(), e
 
+    @required_context
     def _update_brochure_data(
         self, pk: int, data: dto.UpdateBrochureDTO
     ) -> Tuple[Brochure, Optional[Exception]]:
@@ -210,6 +223,7 @@ class BrochureService(BaseService):
             Tuple containing the updated brochure and any error that occurred
         """
         brochure = Brochure.objects.get(id=pk)
+        old_instance = copy.deepcopy(brochure)
 
         # Validate title uniqueness if title is being updated
         if data.title and not self.validate_brochure_title_uniqueness(
@@ -236,9 +250,17 @@ class BrochureService(BaseService):
                 setattr(brochure, key, value)
 
         brochure.save()
+        self.log_entity_change(
+            self.ctx,
+            instance=brochure,
+            old_instance=old_instance,
+            action=ActionType.UPDATE,
+            description="Brochure updated",
+        )
         logger.info(f"Brochure {pk} updated successfully")
         return brochure, None
 
+    @required_context
     def delete_specific_brochure(self, pk: int) -> Optional[Exception]:
         """
         Delete a specific brochure by its ID.
@@ -251,12 +273,19 @@ class BrochureService(BaseService):
         """
         try:
             brochure = Brochure.objects.get(id=pk)
+            old_instance = copy.deepcopy(brochure)
 
             # Delete file first
             if brochure.file:
                 self._delete_brochure_file(brochure.file.name)
 
             brochure.delete()
+            self.log_entity_change(
+                self.ctx,
+                instance=old_instance,
+                action=ActionType.DELETE,
+                description="Brochure deleted",
+            )
             logger.info(f"Brochure {pk} deleted successfully")
             return None
 
@@ -266,6 +295,7 @@ class BrochureService(BaseService):
             logger.error(f"Error deleting brochure {pk}: {str(e)}", exc_info=True)
             return e
 
+    @required_context
     def upload_brochure_file(
         self, pk: int, data: dto.UploadBrochureFileDTO
     ) -> Tuple[Brochure, Optional[Exception]]:
@@ -289,6 +319,7 @@ class BrochureService(BaseService):
             )
             return Brochure(), e
 
+    @required_context
     def _process_file_upload(
         self, pk: int, data: dto.UploadBrochureFileDTO
     ) -> Tuple[Brochure, Optional[Exception]]:
@@ -303,6 +334,7 @@ class BrochureService(BaseService):
             Tuple containing the updated brochure and any error that occurred
         """
         brochure = Brochure.objects.get(id=pk)
+        old_instance = copy.deepcopy(brochure)
 
         # Validate file
         if not self.validate_file_extension(data.file):
@@ -317,6 +349,13 @@ class BrochureService(BaseService):
 
         # Save new file
         brochure.file.save(data.file.name, data.file, save=True)
+        self.log_entity_change(
+            self.ctx,
+            instance=brochure,
+            old_instance=old_instance,
+            action=ActionType.UPDATE,
+            description="Brochure file uploaded",
+        )
 
         logger.info(f"File uploaded successfully for brochure {pk}")
         return brochure, None
