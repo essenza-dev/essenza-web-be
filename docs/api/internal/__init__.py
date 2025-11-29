@@ -12,6 +12,7 @@ from .project import ProjectAPI
 from .article import ArticleAPI
 from .distributor import DistributorAPI
 from .store import StoreAPI
+from .contact_message import ContactMessageAPI
 
 __all__ = [
     "AuthenticationApi",
@@ -28,4 +29,5 @@ __all__ = [
     "ArticleAPI",
     "DistributorAPI",
     "StoreAPI",
+    "ContactMessageAPI",
 ]
