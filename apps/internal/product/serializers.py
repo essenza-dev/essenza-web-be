@@ -4,35 +4,86 @@ Contains all serializers for product-related API operations
 """
 
 from rest_framework import serializers
-from typing import List, Dict, Any
+from typing import List
 from django.conf import settings
 
-from core.models import Product, Brochure
+from core.models import (
+    Product,
+    Brochure,
+    ProductVariant,
+    ProductSpecification,
+    Specification,
+)
 from core.enums import ProductType
 
 # Constants
 PRODUCT_ACTIVE_STATUS_HELP = "Product active status"
 
 
+class ProductVariantNestedSerializer(serializers.ModelSerializer):
+    """Nested serializer for Product Variants in Product detail."""
+
+    class ProductSpecificationSerializer(serializers.ModelSerializer):
+        """Nested serializer for Product Specifications in Product detail."""
+
+        class SpecificationMasterSerializer(serializers.ModelSerializer):
+            """Serializer for the Specification master data."""
+
+            class Meta:
+                model = Specification
+                fields = ["slug", "label", "icon"]
+
+        specification = SpecificationMasterSerializer(read_only=True)
+
+        class Meta:
+            model = ProductSpecification
+            fields = [
+                "id",
+                "specification",
+                "value",
+            ]
+
+    specifications = ProductSpecificationSerializer(
+        source="product_specifications", many=True, read_only=True
+    )
+
+    class Meta:
+        model = ProductVariant
+        fields = [
+            "id",
+            "sku",
+            "model",
+            "size",
+            "description",
+            "image",
+            "specifications",
+            "is_active",
+            "created_at",
+        ]
+
+
+class BrochureNestedSerializer(serializers.ModelSerializer):
+    """Nested serializer for Brochure in Product detail."""
+
+    class Meta:
+        model = Brochure
+        fields = [
+            "id",
+            "title",
+            "file_url",
+        ]
+
+
 class ProductModelSerializer(serializers.ModelSerializer):
     """Serializer for Product model with brochure relationship."""
 
-    brochure = serializers.SerializerMethodField()
+    brochure = BrochureNestedSerializer(read_only=True)
     gallery = serializers.SerializerMethodField()
+    variants = ProductVariantNestedSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
         fields = "__all__"
-
-    def get_brochure(self, obj: Product) -> Dict[str, Any] | None:
-        """Get brochure information if available."""
-        if obj.brochure:
-            return {
-                "id": obj.brochure.id,
-                "title": obj.brochure.title,
-                "file_url": obj.brochure.file_url,
-            }
-        return None
 
     def get_gallery(self, obj: Product) -> List[str]:
         """Get gallery images with proper media URL prefix."""

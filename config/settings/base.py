@@ -215,6 +215,10 @@ SPECTACULAR_SETTINGS = {
             "description": "Application product management",
         },
         {
+            "name": "Internal / Product Variant",
+            "description": "Application product variant management",
+        },
+        {
             "name": "Internal / Brochure",
             "description": "Application brochure management",
         },
