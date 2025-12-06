@@ -17,5 +17,5 @@ urlpatterns = [
     path("/v1/distributors", include("apps.internal.distributor.urls")),
     path("/v1/stores", include("apps.internal.store.urls")),
     path("/v1/contact-messages", include("apps.internal.contact_message.urls")),
-    path("/v1/contact-messages", include("apps.internal.contact_message.urls")),
+    path("/v1/specifications", include("apps.internal.specification.urls")),
 ]
