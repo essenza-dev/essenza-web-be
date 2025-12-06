@@ -1,0 +1,1 @@
+"""Specification internal app module."""
