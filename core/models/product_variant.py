@@ -10,7 +10,7 @@ class ProductVariant(TimeStampedModel, FileUploadModel):
         on_delete=models.CASCADE,
         related_name="variants",
     )
-    sku: models.CharField = models.CharField(max_length=100, unique=True, blank=True)
+    sku: models.CharField = models.CharField(max_length=100, blank=True)
     model = models.CharField(max_length=100, blank=True)
     size = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)

@@ -16,6 +16,7 @@ from .distributor.service import DistributorService
 from .store.service import StoreService
 from .contact_message.service import ContactMessageService
 from .specification.service import SpecificationService
+from .product_variant.service import ProductVariantService
 
 __all__ = [
     "AuthService",
@@ -35,5 +36,5 @@ __all__ = [
     "StoreService",
     "ContactMessageService",
     "SpecificationService",
-    "ContactMessageService",
+    "ProductVariantService",
 ]
