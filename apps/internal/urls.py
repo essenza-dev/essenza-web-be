@@ -19,4 +19,5 @@ urlpatterns = [
     path("/v1/contact-messages", include("apps.internal.contact_message.urls")),
     path("/v1/specifications", include("apps.internal.specification.urls")),
     path("/v1/product-variants", include("apps.internal.product_variant.urls")),
+    path("/v1/users", include("apps.internal.user.urls")),
 ]
